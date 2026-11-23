@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const W=1080;
 const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=6;
+const SEED=7;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
 // Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
@@ -27,10 +27,10 @@ let opps=[
   {name:"Montaigu-Vendée Bouffère Volley-Ball",logo:"assets/logos/montaigu-vendee-bouffere-vb.webp",aka:["Montaigu Vendée Bouffère VB"]},
   {name:"Oya Volley-Ball",logo:"assets/logos/oya-volley-ball-ile-d-yeu.webp",aka:["Oya Volley-Ball (Île d'Yeu)"]},
   {name:"Réveil Sportif Volley-Ball Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
-  {name:"RSVB / SMSA",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
-  {name:"SMSA / Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
+  {name:"RSVB / SMSA",logo:"assets/logos/entente-rsvb-smsa.webp"},
+  {name:"SMSA / Tiffauges",logo:"assets/logos/entente-smsa-tiffauges.webp"},
   {name:"Sporting Club de l'Ouest",logo:"assets/logos/sco-angers-volley.webp"},
-  {name:"St Martin / St Aubin Volley",logo:null},
+  {name:"St Martin / St Aubin Volley",logo:"assets/logos/smsa-volley-ball.webp"},
   {name:"Vendrennes Volley-Ball",logo:"assets/logos/volley-vendrennes-vvb.webp",aka:["Volley Vendrennes (VVB)"]},
   {name:"Volley-Ball Riez Vie",logo:"assets/logos/volley-ball-riez-vie-vbrv.webp",aka:["Volley Ball Riez Vie (VBRV)"]},
   {name:"Volley Club Clisson",logo:"assets/logos/volley-club-clisson.webp"},
@@ -50,7 +50,7 @@ function restore(){ try{
   if(Array.isArray(o.teams)){ const t=o.teams.map(x=>typeof x==='string'?{id:uid(),name:x}:x); const add=old?teams.filter(d=>!t.some(x=>low(x.name)===low(d.name))):[]; teams=t.concat(add); }
   if(Array.isArray(o.opps)){ const t=o.opps.map(x=>x.id?x:{id:uid(),...x}); if(legacy&&o.oppSel!=null&&t[+o.oppSel]) o.oppId=t[+o.oppSel].id; let add=[];
     if(old){ add=opps.filter(d=>{ const m=t.find(x=>low(x.name)===low(d.name)||(d.aka||[]).some(a=>low(a)===low(x.name)));
-      if(!m) return true; m.name=d.name; if(!m.logo&&d.logo) m.logo=d.logo; return false; }); }
+      if(!m) return true; m.name=d.name; if(d.logo&&(!m.logo||m.logo.startsWith('assets/'))) m.logo=d.logo; return false; }); }
     opps=t.concat(add); }
   if(legacy&&o.team){ const m=teams.find(x=>x.name===o.team); o.team=m&&m.id; }
   if(old) setTimeout(store,0); return o; }catch(e){ return null; } }
