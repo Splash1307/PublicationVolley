@@ -69,9 +69,14 @@
         <label data-for="match">Heure<input id="time" type="time" value="20:30"></label>
         <label data-for="match">Lieu<select id="home"><option value="1">À domicile</option><option value="0">À l'extérieur</option></select></label>
         <label data-for="match" id="awayL" class="full" hidden>Salle (extérieur)<input id="awayVenue" placeholder="ex. Salle des sports, Bouffère"></label>
-        <label data-for="result" class="full">Sets, score des Griffons en premier
-          <input id="sets" value="26-24, 25-20, 25-15">
-          <span class="small" id="setsInfo"></span></label>
+        <div data-for="result" class="full">
+          <span class="lbl" id="setsLbl">Score des sets</span>
+          <div class="sets" id="setGrid" role="group" aria-labelledby="setsLbl">
+            <span></span><span class="sh">Griffons</span><span class="sh" id="setOppName">Adversaire</span>
+          </div>
+          <input id="sets" type="hidden" value="">
+          <p class="small" id="setsInfo"></p>
+        </div>
       </div>
     </div>
 

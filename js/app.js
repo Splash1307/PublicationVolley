@@ -165,7 +165,7 @@ async function render(){
     plate(o,()=>clubLogo&&contain(clubLogo,229,1053,150,150),()=>{ ctx.fillStyle=C.navy; ctx.textAlign='center'; ctx.font='150px Anton'; ctx.fillText(`${a} - ${b}`,540,1108); },oppMark);
     const parts=sets.map(([x,y])=>`${x}:${y}`); const lines=[]; for(let i=0;i<parts.length;i+=2) lines.push(parts.slice(i,i+2).join(', ')+(i+2<parts.length?',':''));
     infoLines(o,lines.slice(0,3),56);
-    $('setsInfo').textContent=sets.length?`${sets.length} set(s) lus · ${a}-${b}`:'Format attendu : 25-20, 23-25, …';
+    $('setsInfo').textContent=sets.length?`Match : ${a} - ${b}${a===3?' · victoire des Griffons':b===3?' · défaite':''}`:'Tape les points de chaque set.';
   } else {
     grunge(dmy($('date').value),W-22,top+64,56,'right',360);
     grunge('JOUR DE MATCH',W/2,top+192,128,'center',880);
@@ -202,7 +202,7 @@ function drawClubs(){ const q=$('clubSearch').value; const list=sortedOpps().fil
   $('oppList').innerHTML=list.map(o=>`<div class="item"><label class="pick" title="Changer le logo">${o.logo?`<img src="${o.logo}" alt="">`:'logo'}<input type="file" accept="image/*" data-ologo="${o.id}" aria-label="Logo de ${esc(o.name)}"></label><input type="text" data-o="${o.id}" value="${esc(o.name)}" aria-label="Nom du club"><button type="button" data-odel="${o.id}" aria-label="Supprimer">✕</button></div>`).join('')||'<p class="small">Aucun club trouvé.</p>'; }
 
 $('oppSearch').addEventListener('input',drawPicker);
-function drawBtn(){ const o=curOpp(); const free=oppId==='__free'; $('oppBtn').innerHTML=`${o.logo?`<img src="${o.logo}" alt="">`:`<span class="nologo">${free?'+':'?'}</span>`}<span class="nm">${esc(free?(o.name||'Autre adversaire…'):(o.name||'Choisir un adversaire'))}</span><span class="chev" aria-hidden="true"></span>`; }
+function drawBtn(){ const o=curOpp(); $('setOppName').textContent=o.name?(o.name.length>18?o.name.slice(0,17)+'…':o.name):'Adversaire'; const free=oppId==='__free'; $('oppBtn').innerHTML=`${o.logo?`<img src="${o.logo}" alt="">`:`<span class="nologo">${free?'+':'?'}</span>`}<span class="nm">${esc(free?(o.name||'Autre adversaire…'):(o.name||'Choisir un adversaire'))}</span><span class="chev" aria-hidden="true"></span>`; }
 function openDD(v){ $('oppPanel').hidden=!v; $('oppBtn').setAttribute('aria-expanded',v); if(v){ $('oppSearch').value=''; drawPicker(); if(matchMedia('(pointer:fine)').matches) $('oppSearch').focus(); } }
 $('oppBtn').addEventListener('click',()=>openDD($('oppPanel').hidden));
 document.addEventListener('click',e=>{ if($('oppPanel').hidden) return; const path=e.composedPath(); if(!path.includes($('oppPanel'))&&!path.includes($('oppBtn'))) openDD(false); });
@@ -242,6 +242,26 @@ if(window.claude&&window.claude.use){ window.claude.use('downloads').then(d=>{ d
 else { $('dl').hidden=false; } // standalone page: plain browser download
 const fname=()=>`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`;
 $('dl').addEventListener('click',()=>{ if(!downloads){ cv.toBlob(blob=>{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); },'image/jpeg',.93); return; } cv.toBlob(async blob=>{ try{ await downloads.save({filename:`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`,data:blob}); toast('Image enregistrée'); }catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } $('dl').hidden=true; toast('Téléchargement indisponible ici : appui long sur l\'image'); } },'image/jpeg',.93); });
+
+// ---------- score grid ----------
+// One row per set (Griffons | adversaire). Sets 4 and 5 only appear while the match is undecided.
+// The grid writes "25-20, 23-25, …" into the hidden #sets field that render() reads.
+const setGrid=$('setGrid');
+for(let i=0;i<5;i++) setGrid.insertAdjacentHTML('beforeend',`<span class="sn" data-row="${i}">Set ${i+1}</span>`+[0,1].map(side=>`<input data-row="${i}" data-side="${side}" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="–" autocomplete="off" aria-label="Set ${i+1}, ${side?'adversaire':'Griffons'}">`).join(''));
+const cell=(i,side)=>setGrid.querySelector(`input[data-row="${i}"][data-side="${side}"]`);
+function syncSets(){
+  const done=[]; let a=0,b=0, shown=3;
+  for(let i=0;i<5;i++){
+    const x=cell(i,0).value, y=cell(i,1).value, full=x!==''&&y!==''&&x!==y;
+    if(i<shown&&full){ done.push(`${+x}-${+y}`); +x>+y?a++:b++; if(i===shown-1&&a<3&&b<3&&shown<5) shown++; }
+    cell(i,0).classList.toggle('win',full&&+x>+y); cell(i,1).classList.toggle('win',full&&+y>+x);
+  }
+  setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=shown);
+  $('sets').value=done.join(', '); render();
+}
+setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) return; t.value=t.value.replace(/\D/g,'').slice(0,2); syncSets();
+  if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });
+setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=3);
 
 const saved=restore(); fillTeams(saved&&saved.team); oppId=(saved&&saved.oppId)||(sortedOpps()[0]||{}).id||null; drawPicker(); drawTeams(); drawClubs(); sync();
 (async()=>{ Object.assign(teamPhotos,await idb.all()); drawTeams(); await loadClubLogo(); await loadOpp(); render();
