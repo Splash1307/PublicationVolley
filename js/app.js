@@ -5,12 +5,13 @@ const $=id=>document.getElementById(id);
 const W=1080;
 const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=7;
+const SEED=8;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
 // Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
 let opps=[
   {name:"A.S.L. Vendée Volley-Ball",logo:"assets/logos/asl-volley.webp",aka:["ASL Volley"]},
+  {name:"Aizenay Volley-Ball (Les Griffons)",logo:"assets/logos/griffons.webp"},
   {name:"AS Bruffière Defontaine",logo:"assets/logos/asbd-volley-ball.webp"},
   {name:"AS Saint-Barthélemy d'Anjou VB",logo:"assets/logos/st-barthelemy-volley.webp"},
   {name:"Challans Volley-Ball",logo:"assets/logos/challans-volley-ball-cvb.webp",aka:["Challans Volley-Ball (CVB)"]},
