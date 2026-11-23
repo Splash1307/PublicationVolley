@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const W=1080;
 const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=5;
+const SEED=6;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
 // Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
@@ -20,12 +20,15 @@ let opps=[
   {name:"Jeunesse Sport Coulaines",logo:"assets/logos/jeunesse-sport-coulaines.webp"},
   {name:"La Baule Volley-Ball",logo:"assets/logos/la-baule-volley-ball.webp"},
   {name:"La Roche-sur-Yon Volley-Ball",logo:"assets/logos/la-roche-volley-ball-lrvb.webp",aka:["La Roche Volley-Ball (LRVB)"]},
+  {name:"Les Herbiers",logo:"assets/logos/epesses-herbiers-vb-ehvb.webp"},
   {name:"Les Neptunes Nantes Volley Association",logo:"assets/logos/neptunes-de-nantes.webp"},
   {name:"Les Sables Volley Vendée",logo:"assets/logos/les-sables-volley-vendee-lsvv.webp",aka:["Les Sables Volley Vendée (LSVV)"]},
   {name:"Mareuil Sporting Club",logo:"assets/logos/mareuil-sporting-club.webp"},
   {name:"Montaigu-Vendée Bouffère Volley-Ball",logo:"assets/logos/montaigu-vendee-bouffere-vb.webp",aka:["Montaigu Vendée Bouffère VB"]},
   {name:"Oya Volley-Ball",logo:"assets/logos/oya-volley-ball-ile-d-yeu.webp",aka:["Oya Volley-Ball (Île d'Yeu)"]},
   {name:"Réveil Sportif Volley-Ball Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
+  {name:"RSVB / SMSA",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
+  {name:"SMSA / Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
   {name:"Sporting Club de l'Ouest",logo:"assets/logos/sco-angers-volley.webp"},
   {name:"St Martin / St Aubin Volley",logo:null},
   {name:"Vendrennes Volley-Ball",logo:"assets/logos/volley-vendrennes-vvb.webp",aka:["Volley Vendrennes (VVB)"]},
