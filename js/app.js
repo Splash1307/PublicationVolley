@@ -249,15 +249,24 @@ $('dl').addEventListener('click',()=>{ if(!downloads){ cv.toBlob(blob=>{ const u
 const setGrid=$('setGrid');
 for(let i=0;i<5;i++) setGrid.insertAdjacentHTML('beforeend',`<span class="sn" data-row="${i}">Set ${i+1}</span>`+[0,1].map(side=>`<input data-row="${i}" data-side="${side}" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="–" autocomplete="off" aria-label="Set ${i+1}, ${side?'adversaire':'Griffons'}">`).join(''));
 const cell=(i,side)=>setGrid.querySelector(`input[data-row="${i}"][data-side="${side}"]`);
+// Volley rules: sets 1-4 to 25, set 5 to 15, always with 2 points clear (no cap: 26-24, 31-29…).
+function setError(n,x,y){ const t=n===5?15:25, w=Math.max(x,y), l=Math.min(x,y);
+  if(w<t) return `Set ${n} : le gagnant doit atteindre ${t} points.`;
+  if(l<=t-2&&w!==t) return `Set ${n} : ${x}-${y} impossible, le set s'arrête à ${t}-${l}.`;
+  if(l>t-2&&w!==l+2) return `Set ${n} : ${x}-${y} impossible, il faut 2 points d'écart (ex. ${l+2}-${l}).`;
+  return ''; }
 function syncSets(){
-  const done=[]; let a=0,b=0, shown=3;
+  const done=[], errs=[]; let a=0,b=0, shown=3;
   for(let i=0;i<5;i++){
-    const x=cell(i,0).value, y=cell(i,1).value, full=x!==''&&y!==''&&x!==y;
-    if(i<shown&&full){ done.push(`${+x}-${+y}`); +x>+y?a++:b++; if(i===shown-1&&a<3&&b<3&&shown<5) shown++; }
-    cell(i,0).classList.toggle('win',full&&+x>+y); cell(i,1).classList.toggle('win',full&&+y>+x);
+    const xs=cell(i,0).value, ys=cell(i,1).value, x=+xs, y=+ys;
+    const both=xs!==''&&ys!=='', tie=both&&x===y, full=both&&!tie, err=i<shown&&both?(tie?`Set ${i+1} : égalité impossible.`:setError(i+1,x,y)):'';
+    if(i<shown&&full){ done.push(`${x}-${y}`); x>y?a++:b++; if(i===shown-1&&a<3&&b<3&&shown<5) shown++; }
+    if(err) errs.push(err);
+    cell(i,0).classList.toggle('win',full&&!err&&x>y); cell(i,1).classList.toggle('win',full&&!err&&y>x);
+    [0,1].forEach(sd=>cell(i,sd).classList.toggle('bad',!!err));
   }
   setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=shown);
-  $('sets').value=done.join(', '); render();
+  $('sets').value=done.join(', '); $('setsErr').textContent=errs.join('\n'); render();
 }
 setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) return; t.value=t.value.replace(/\D/g,'').slice(0,2); syncSets();
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });

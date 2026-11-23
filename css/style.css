@@ -82,3 +82,5 @@ html.locked body > :not(.lock){visibility:hidden}
 .sets .sn{font-weight:600;color:var(--mute);font-size:15px;padding-right:4px}
 .sets input{margin:0;text-align:center;font:600 24px Barlow,sans-serif;padding:6px}
 .sets input.win{border-color:var(--yel);box-shadow:inset 0 0 0 2px var(--yel)}
+.sets input.bad{border-color:#d64545;box-shadow:inset 0 0 0 2px #d64545}
+.err{color:#d64545;font-weight:600;white-space:pre-line}.err:empty{display:none}
