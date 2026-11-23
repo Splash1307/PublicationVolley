@@ -7,10 +7,21 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex, nofollow">
+<script src="js/lock.js"></script>
 <link rel="icon" href="assets/logos/griffons.webp">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div class="lock" id="lock" hidden>
+  <div class="lockcard">
+    <img src="assets/logos/griffons.webp" alt="" width="72" height="72">
+    <h1>Studio posts</h1>
+    <label for="lockCode">Code d'accès</label>
+    <input id="lockCode" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••">
+    <p id="lockMsg" role="alert"></p>
+  </div>
+</div>
 <header class="top">
   <img id="hdrLogo" alt="">
   <h1>Studio posts · Les Griffons</h1>
