@@ -5,10 +5,35 @@ const $=id=>document.getElementById(id);
 const W=1080;
 const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=4;
+const SEED=5;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
-let opps=[{name:'Volley Club Clisson',logo:'assets/logos/volley-club-clisson.webp'},{name:'VB Club Fontenaisien',logo:'assets/logos/vb-club-fontenaisien.webp'},{name:'Montaigu Vendée Bouffère VB',logo:'assets/logos/montaigu-vendee-bouffere-vb.webp'}].concat([{"name": "Oya Volley-Ball (Île d'Yeu)", "logo": "assets/logos/oya-volley-ball-ile-d-yeu.webp"}, {"name": "Volley Sud Vendée (Luçon)", "logo": "assets/logos/volley-sud-vendee-lucon.webp"}, {"name": "ASL Volley", "logo": "assets/logos/asl-volley.webp"}, {"name": "ES Florentin Volley-Ball", "logo": "assets/logos/es-florentin-volley-ball.webp"}, {"name": "Mareuil Sporting Club", "logo": "assets/logos/mareuil-sporting-club.webp"}, {"name": "CSSG Le Mans Volley", "logo": "assets/logos/cssg-le-mans-volley.webp"}, {"name": "Volley Vendrennes (VVB)", "logo": "assets/logos/volley-vendrennes-vvb.webp"}, {"name": "Volley Ball Riez Vie (VBRV)", "logo": "assets/logos/volley-ball-riez-vie-vbrv.webp"}, {"name": "Épesses Herbiers VB (EHVB)", "logo": "assets/logos/epesses-herbiers-vb-ehvb.webp"}, {"name": "La Roche Volley-Ball (LRVB)", "logo": "assets/logos/la-roche-volley-ball-lrvb.webp"}, {"name": "Les Sables Volley Vendée (LSVV)", "logo": "assets/logos/les-sables-volley-vendee-lsvv.webp"}, {"name": "Challans Volley-Ball (CVB)", "logo": "assets/logos/challans-volley-ball-cvb.webp"}]).map(o=>({id:uid(),...o}));
+// Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
+let opps=[
+  {name:"A.S.L. Vendée Volley-Ball",logo:"assets/logos/asl-volley.webp",aka:["ASL Volley"]},
+  {name:"AS Bruffière Defontaine",logo:"assets/logos/asbd-volley-ball.webp"},
+  {name:"AS Saint-Barthélemy d'Anjou VB",logo:"assets/logos/st-barthelemy-volley.webp"},
+  {name:"Challans Volley-Ball",logo:"assets/logos/challans-volley-ball-cvb.webp",aka:["Challans Volley-Ball (CVB)"]},
+  {name:"CS Sablons Gazonfier Le Mans",logo:"assets/logos/cssg-le-mans-volley.webp",aka:["CSSG Le Mans Volley"]},
+  {name:"Épesses Herbiers Volley-Ball",logo:"assets/logos/epesses-herbiers-vb-ehvb.webp",aka:["Épesses Herbiers VB (EHVB)"]},
+  {name:"Éveil Sportif Florentin Volley-Ball",logo:"assets/logos/es-florentin-volley-ball.webp",aka:["ES Florentin Volley-Ball"]},
+  {name:"Jeunesse Sport Coulaines",logo:"assets/logos/jeunesse-sport-coulaines.webp"},
+  {name:"La Baule Volley-Ball",logo:"assets/logos/la-baule-volley-ball.webp"},
+  {name:"La Roche-sur-Yon Volley-Ball",logo:"assets/logos/la-roche-volley-ball-lrvb.webp",aka:["La Roche Volley-Ball (LRVB)"]},
+  {name:"Les Neptunes Nantes Volley Association",logo:"assets/logos/neptunes-de-nantes.webp"},
+  {name:"Les Sables Volley Vendée",logo:"assets/logos/les-sables-volley-vendee-lsvv.webp",aka:["Les Sables Volley Vendée (LSVV)"]},
+  {name:"Mareuil Sporting Club",logo:"assets/logos/mareuil-sporting-club.webp"},
+  {name:"Montaigu-Vendée Bouffère Volley-Ball",logo:"assets/logos/montaigu-vendee-bouffere-vb.webp",aka:["Montaigu Vendée Bouffère VB"]},
+  {name:"Oya Volley-Ball",logo:"assets/logos/oya-volley-ball-ile-d-yeu.webp",aka:["Oya Volley-Ball (Île d'Yeu)"]},
+  {name:"Réveil Sportif Volley-Ball Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
+  {name:"Sporting Club de l'Ouest",logo:"assets/logos/sco-angers-volley.webp"},
+  {name:"St Martin / St Aubin Volley",logo:null},
+  {name:"Vendrennes Volley-Ball",logo:"assets/logos/volley-vendrennes-vvb.webp",aka:["Volley Vendrennes (VVB)"]},
+  {name:"Volley-Ball Riez Vie",logo:"assets/logos/volley-ball-riez-vie-vbrv.webp",aka:["Volley Ball Riez Vie (VBRV)"]},
+  {name:"Volley Club Clisson",logo:"assets/logos/volley-club-clisson.webp"},
+  {name:"Volley Club Fontenaisien",logo:"assets/logos/vb-club-fontenaisien.webp",aka:["VB Club Fontenaisien"]},
+  {name:"Volley Sud Vendée",logo:"assets/logos/volley-sud-vendee-lucon.webp",aka:["Volley Sud Vendée (Luçon)"]}
+].map(o=>({id:uid(),...o}));
 const SETTINGS=['venue'];
 const teamPhotos={}; // id -> dataURL (kept in IndexedDB)
 
@@ -20,7 +45,10 @@ function restore(){ try{
   SETTINGS.forEach(k=>{ if(o[k]) $(k).value=o[k]; }); if(o.logo) clubLogoData=o.logo;
   const low=x=>String(x).trim().toLowerCase(), old=(o.seed||1)<SEED;
   if(Array.isArray(o.teams)){ const t=o.teams.map(x=>typeof x==='string'?{id:uid(),name:x}:x); const add=old?teams.filter(d=>!t.some(x=>low(x.name)===low(d.name))):[]; teams=t.concat(add); }
-  if(Array.isArray(o.opps)){ const t=o.opps.map(x=>x.id?x:{id:uid(),...x}); if(legacy&&o.oppSel!=null&&t[+o.oppSel]) o.oppId=t[+o.oppSel].id; const add=old?opps.filter(d=>!t.some(x=>low(x.name)===low(d.name))):[]; opps=t.concat(add); }
+  if(Array.isArray(o.opps)){ const t=o.opps.map(x=>x.id?x:{id:uid(),...x}); if(legacy&&o.oppSel!=null&&t[+o.oppSel]) o.oppId=t[+o.oppSel].id; let add=[];
+    if(old){ add=opps.filter(d=>{ const m=t.find(x=>low(x.name)===low(d.name)||(d.aka||[]).some(a=>low(a)===low(x.name)));
+      if(!m) return true; m.name=d.name; if(!m.logo&&d.logo) m.logo=d.logo; return false; }); }
+    opps=t.concat(add); }
   if(legacy&&o.team){ const m=teams.find(x=>x.name===o.team); o.team=m&&m.id; }
   if(old) setTimeout(store,0); return o; }catch(e){ return null; } }
 // IndexedDB for team photos (too big for localStorage)
