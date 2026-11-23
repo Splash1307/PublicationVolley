@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio posts Griffons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/logos/griffons.webp">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <img id="hdrLogo" alt="">
+  <h1>Studio posts · Les Griffons</h1>
+  <p>Remplis, télécharge le visuel, publie.</p>
+</header>
+
+<main class="wrap">
+  <section class="preview" aria-label="Aperçu du post">
+    <div class="frame"><img id="out" alt="Aperçu du visuel Instagram"></div>
+    <div class="actions">
+      <button class="main" id="dl" hidden>Télécharger l'image</button>
+    </div>
+    <p class="hint">Sur téléphone, tu peux aussi faire un appui long sur l'image pour l'enregistrer.</p>
+  </section>
+
+  <section>
+    <div class="panel">
+      <div class="seg" role="group" aria-label="Type de post">
+        <button data-kind="result" aria-pressed="true">Résultat</button>
+        <button data-kind="match" aria-pressed="false">Jour de match</button>
+      </div>
+      <div class="seg" role="group" aria-label="Format">
+        <button data-fmt="1350" aria-pressed="true">Post 4:5</button>
+        <button data-fmt="1920" aria-pressed="false">Story</button>
+      </div>
+      <div class="grid">
+        <label class="full">Équipe<select id="team"></select></label>
+        <div class="full">
+          <label for="photo">Photo du match</label>
+          <div class="row"><input id="photo" type="file" accept="image/*"><button id="photoDel" type="button" hidden>Retirer</button></div>
+          <p class="small" id="photoInfo"></p>
+        </div>
+        <div class="full">
+          <label for="oppBtn">Adversaire</label>
+          <button type="button" id="oppBtn" class="ddbtn" aria-haspopup="listbox" aria-expanded="false"></button>
+          <div class="ddpanel" id="oppPanel" hidden>
+            <input id="oppSearch" type="search" placeholder="Rechercher un club…" autocomplete="off" aria-label="Rechercher un club">
+            <div class="picker" id="oppPick" role="listbox" aria-label="Adversaires"></div>
+          </div>
+        </div>
+        <label class="full" id="oppFreeL" hidden>Nom de l'adversaire<input id="opp" placeholder="ex. La Roche VB 3">
+          <span class="small">Pour avoir son logo, ajoute le club dans Réglages du club › Clubs adverses.</span></label>
+        <label>Date<input id="date" type="date"></label>
+        <label data-for="match">Heure<input id="time" type="time" value="20:30"></label>
+        <label data-for="match">Lieu<select id="home"><option value="1">À domicile</option><option value="0">À l'extérieur</option></select></label>
+        <label data-for="match" id="awayL" class="full" hidden>Salle (extérieur)<input id="awayVenue" placeholder="ex. Salle des sports, Bouffère"></label>
+        <label data-for="result" class="full">Sets, score des Griffons en premier
+          <input id="sets" value="26-24, 25-20, 25-15">
+          <span class="small" id="setsInfo"></span></label>
+      </div>
+    </div>
+
+    <details class="panel">
+      <summary>Réglages du club</summary>
+      <h2 style="margin-top:14px">Équipes</h2>
+      <p class="small" style="margin-top:-6px">Le nom sert de titre en haut du visuel. Touche le carré pour choisir la photo par défaut de l'équipe, utilisée quand tu n'ajoutes pas de photo du match.</p>
+      <div id="teamList"></div>
+      <button type="button" id="teamAdd" style="margin-top:8px">+ Ajouter une équipe</button>
+      <h2 style="margin-top:22px">Clubs adverses</h2>
+      <div class="addclub">
+        <label class="pick" id="newLogoPick" title="Logo">logo<input type="file" accept="image/*" id="newLogo" aria-label="Logo du nouveau club"></label>
+        <input type="text" id="newName" placeholder="Nom du club" aria-label="Nom du nouveau club">
+        <button type="button" id="newAdd" class="main">Ajouter</button>
+      </div>
+      <input id="clubSearch" type="search" placeholder="Rechercher dans les clubs…" autocomplete="off" style="margin-top:10px">
+      <div id="oppList"></div>
+      <h2 style="margin-top:22px">Club</h2>
+      <div class="grid">
+        <div class="full">
+          <label for="logo">Logo du club (remplace celui repris de vos posts)</label>
+          <div class="row"><img id="logoThumb" class="thumb" alt=""><input id="logo" type="file" accept="image/*"><button id="logoReset" type="button">Par défaut</button></div>
+        </div>
+        <label class="full">Salle à domicile<input id="venue" value="Salle Omega, Aizenay"></label>
+      </div>
+      <p class="small">Tous ces réglages restent enregistrés dans ton navigateur.</p>
+    </details>
+  </section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
