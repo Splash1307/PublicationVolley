@@ -241,7 +241,7 @@ let downloads=null;
 if(window.claude&&window.claude.use){ window.claude.use('downloads').then(d=>{ downloads=d; if(d) $('dl').hidden=false; }).catch(()=>{}); }
 else { $('dl').hidden=false; } // standalone page: plain browser download
 const fname=()=>`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`;
-$('dl').addEventListener('click',()=>{ if(!downloads){ cv.toBlob(blob=>{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); },'image/jpeg',.93); return; } cv.toBlob(async blob=>{ try{ await downloads.save({filename:`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`,data:blob}); toast('Image enregistrée'); }catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } $('dl').hidden=true; toast('Téléchargement indisponible ici : appui long sur l\'image'); } },'image/jpeg',.93); });
+$('dl').addEventListener('click',()=>{ if(scoreBlocked()){ toast('Corrige le score avant de télécharger'); setGrid.scrollIntoView({behavior:'smooth',block:'center'}); return; } if(!downloads){ cv.toBlob(blob=>{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); },'image/jpeg',.93); return; } cv.toBlob(async blob=>{ try{ await downloads.save({filename:`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`,data:blob}); toast('Image enregistrée'); }catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } $('dl').hidden=true; toast('Téléchargement indisponible ici : appui long sur l\'image'); } },'image/jpeg',.93); });
 
 // ---------- score grid ----------
 // One row per set (Griffons | adversaire). Sets 4 and 5 only appear while the match is undecided.
@@ -255,6 +255,7 @@ function setError(n,x,y){ const t=n===5?15:25, w=Math.max(x,y), l=Math.min(x,y);
   if(l<=t-2&&w!==t) return `Set ${n} : ${x}-${y} impossible, le set s'arrête à ${t}-${l}.`;
   if(l>t-2&&w!==l+2) return `Set ${n} : ${x}-${y} impossible, il faut 2 points d'écart (ex. ${l+2}-${l}).`;
   return ''; }
+const scoreBlocked=()=>$('setsErr').textContent!=='';
 function syncSets(){
   const done=[], errs=[]; let a=0,b=0, shown=3;
   for(let i=0;i<5;i++){
@@ -266,7 +267,8 @@ function syncSets(){
     [0,1].forEach(sd=>cell(i,sd).classList.toggle('bad',!!err));
   }
   setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=shown);
-  $('sets').value=done.join(', '); $('setsErr').textContent=errs.join('\n'); render();
+  $('sets').value=done.join(', '); $('setsErr').textContent=errs.join('\n');
+  const blocked=errs.length>0; $('dl').setAttribute('aria-disabled',blocked); document.querySelector('.frame').classList.toggle('blocked',blocked); render();
 }
 setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) return; t.value=t.value.replace(/\D/g,'').slice(0,2); syncSets();
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });
