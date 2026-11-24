@@ -411,11 +411,19 @@ function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p 
   if(!list.length){ box.innerHTML='<p class="small empty">Aucun match ne correspond à ces filtres.</p>'; $('resMore').hidden=true; return; }
   const groups=[]; list.forEach(m=>{ const w=weekendOf(m.date); let g=groups.find(x=>x.w===w); if(!g) groups.push(g={w,list:[]}); g.list.push(m); });
   const many=fT||fW?99:resShown; // avec un filtre, on montre tout ce qui correspond
-  box.innerHTML=groups.slice(0,many).map(g=>`<h3 class="wk">${wkLabel(g.w)}</h3>`+g.list.map(m=>{ const [a,b]=m.score, win=m.forfait?a!=='F'&&a!=='P':+a>+b, lg=oppLogo(m);
-    return `<button type="button" class="res" data-code="${esc(m.code)}">
-      <span class="rteam"><b>${esc(m.equipe||cap(m.aizenay))}</b><small>${esc(cap(m.competition))} · ${new Date(m.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</small></span>
-      <span class="rscore ${win?'w':'l'}">${esc(a)} - ${esc(b)}</span>
-      <span class="ropp">${lg?`<img src="${lg}" alt="">`:'<span class="nologo">?</span>'}<span>${m.domicile?'contre':'chez'} ${esc(cap(m.adversaire))}</span></span>
+  const club=clubLogoData||DEFAULT_LOGO, fmtD=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  box.innerHTML=groups.slice(0,many).map(g=>`<h3 class="wk">${wkLabel(g.w)}</h3>`+g.list.map(m=>{
+    const [a,b]=m.score, win=m.forfait?a!=='F'&&a!=='P':+a>+b, lg=oppLogo(m);
+    const badge=m.forfait?(win?'Victoire · forfait':'Défaite · forfait'):(win?'Victoire':'Défaite');
+    const sets=m.sets.map(([x,y])=>`<span class="${x>y?'sw':''}">${x}-${y}</span>`).join('');
+    return `<button type="button" class="res ${win?'win':'loss'}" data-code="${esc(m.code)}">
+      <span class="rhead"><span class="rtitle"><b>${esc(m.equipe||cap(m.aizenay))}</b>${norm(m.equipe||'').replace(/[^a-z]/g,'').startsWith(norm(m.competition).replace(/[^a-z]/g,''))?'':`<small>${esc(cap(m.competition))}</small>`}</span><span class="badge">${badge}</span></span>
+      <span class="rbody">
+        <span class="rside"><img src="${club}" alt=""><span>Griffons</span></span>
+        <span class="rmid"><span class="rscore"><span class="${win?'hi':''}">${esc(a)}</span><i>-</i><span class="${win?'':'hi'}">${esc(b)}</span></span><span class="rsets">${sets}</span></span>
+        <span class="rside">${lg?`<img src="${lg}" alt="">`:'<span class="nologo">?</span>'}<span>${esc(cap(m.adversaire))}</span></span>
+      </span>
+      <span class="rfoot"><span>${fmtD(m.date)}${m.heure&&m.heure!=='00:00'?' · '+m.heure.replace(':','h'):''}</span><span>${m.domicile?'À domicile':'À l\'extérieur'}${m.salle?' · '+esc(cap(m.salle)):''}</span></span>
     </button>`; }).join('')).join('');
   $('resMore').hidden=groups.length<=many; }
 function applyResult(m){
