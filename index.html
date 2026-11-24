@@ -36,11 +36,11 @@
     <div class="frame"><img id="out" alt="Aperçu du visuel Instagram"></div>
     <div class="actions">
       <button class="main" id="dl" hidden>Télécharger l'image</button>
-      <button type="button" id="adjBtn" hidden>Ajuster la photo</button>
+      <button type="button" id="adjBtn" hidden>Déplacer / zoomer</button>
     </div>
     <div class="adjbar" id="adjBar" hidden>
-      <p>Fais glisser la photo pour la déplacer, pince avec deux doigts ou utilise le curseur pour zoomer.</p>
-      <label class="zoom">Zoom<input type="range" id="adjZoom" min="1" max="4" step="0.01" value="1"></label>
+      <p>Fais glisser la photo ou un texte pour le déplacer. Pour zoomer la photo, pince avec deux doigts ou utilise le curseur.</p>
+      <label class="zoom" id="zoomL">Zoom<input type="range" id="adjZoom" min="1" max="4" step="0.01" value="1"></label>
       <div class="row">
         <button type="button" id="adjReset">Recentrer</button>
         <button type="button" id="adjDone" class="main">Terminé</button>
@@ -91,6 +91,13 @@
           <p class="small err" id="setsErr" role="alert"></p>
         </div>
       </div>
+    </div>
+
+    <div class="panel">
+      <h2>Textes</h2>
+      <p class="small" style="margin:-6px 0 10px">Ajoute un texte libre sur le visuel, puis place-le avec « Déplacer / zoomer ».</p>
+      <div id="textList"></div>
+      <button type="button" id="textAdd" class="add">+ Ajouter un texte</button>
     </div>
 
   </section>
