@@ -196,7 +196,7 @@ async function render(){
 
 // ---------- UI ----------
 function sync(){ $('oppFreeL').hidden=oppId!=='__free'; document.querySelectorAll('[data-for]').forEach(el=>el.hidden=el.dataset.for!==kind); $('awayL').hidden=kind!=='match'||$('home').value==='1'; }
-function photoInfo(){ const has=!!teamPhotos[curTeam().id]; $('photoDel').hidden=!matchPhoto; $('photoInfo').textContent=matchPhoto?'Photo du match utilisée.':(has?`Sinon : photo par défaut de « ${curTeam().name} ».`:'Pas de photo par défaut pour cette équipe (Réglages du club › Équipes).'); }
+function photoInfo(){ const has=!!teamPhotos[curTeam().id]; $('photoDel').hidden=!matchPhoto; $('photoInfo').textContent=matchPhoto?'Photo du match utilisée.':(has?'':'Pas de photo par défaut pour cette équipe (Réglages du club › Équipes).'); }
 document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{ kind=b.dataset.kind; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x===b)); sync(); render(); }));
 document.querySelectorAll('[data-fmt]').forEach(b=>b.addEventListener('click',()=>{ H=+b.dataset.fmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.setAttribute('aria-pressed',x===b)); render(); }));
 ['date','time','home','awayVenue','sets','opp','venue','team'].forEach(id=>$(id).addEventListener('input',()=>{ sync(); if(id==='opp') drawBtn(); render(); if(id==='venue'||id==='team') store(); }));
