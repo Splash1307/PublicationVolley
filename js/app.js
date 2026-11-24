@@ -394,7 +394,7 @@ $('textList').addEventListener('click',e=>{ const b=e.target.closest('button[dat
 
 // ---------- résultats FFVB ----------
 // data/resultats.json est produit par scripts/resultats.mjs (GitHub Actions) à partir du site de la FFVB.
-let results=null, resShown=2;
+let results=null, resShown=1; // au départ : seulement le dernier week-end
 const MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 const weekendOf=d=>{ const x=new Date(d+'T12:00'); const k=(x.getDay()+1)%7; x.setDate(x.getDate()-k); return x.toISOString().slice(0,10); }; // samedi de la semaine
 function wkLabel(sat){ const a=new Date(sat+'T12:00'), b=new Date(a); b.setDate(a.getDate()+1);
@@ -452,12 +452,12 @@ function applyResult(m){
   if(!t) $('team').focus(); }
 let resReturn=null;
 function openResults(v){ $('results').hidden=!v; document.body.classList.toggle('noscroll',v);
-  if(v){ resReturn=document.activeElement; $('resClose').focus(); if(!results) drawResults(); loadResults(); } else if(resReturn&&resReturn.isConnected) resReturn.focus(); }
+  if(v){ resShown=1; resReturn=document.activeElement; $('resClose').focus(); if(!results) drawResults(); loadResults(); } else if(resReturn&&resReturn.isConnected) resReturn.focus(); }
 $('resOpen').addEventListener('click',()=>openResults(true));
 $('resClose').addEventListener('click',()=>openResults(false));
 $('results').addEventListener('click',e=>{ if(e.target.id==='results') openResults(false); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('results').hidden) openResults(false); });
-$('resMore').addEventListener('click',()=>{ resShown+=2; drawResults(); });
+$('resMore').addEventListener('click',()=>{ resShown+=1; drawResults(); });
 ['fTeam','fWeek','fComp'].forEach(id=>$(id).addEventListener('change',drawResults));
 $('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(!b) return; const m=results.matchs.find(x=>x.code===b.dataset.code); if(m) applyResult(m); });
 
