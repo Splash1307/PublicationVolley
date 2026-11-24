@@ -86,9 +86,9 @@ function band(c,p0,p1,p2,p3,w0,w1,color,wm){ const N=48, L=[], R=[]; const bz=(t
   c.beginPath(); L.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); R.reverse().forEach(p=>c.lineTo(p[0],p[1])); c.closePath(); c.fillStyle=color; c.fill(); }
 let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
 // grunge text: draw on its own layer then punch specks out
-function grunge(text,x,y,size,align,maxW){
+function grunge(text,x,y,size,align,maxW,color='#fff'){
   const l=document.createElement('canvas'); l.width=W; l.height=Math.ceil(size*1.4); const g=l.getContext('2d');
-  const s=fit(g,text,maxW,size,'Anton'); g.font=`${s}px Anton`; g.fillStyle='#fff'; g.textAlign=align; g.textBaseline='alphabetic'; g.fillText(text,x,s*1.15);
+  const s=fit(g,text,maxW,size,'Anton'); g.font=`${s}px Anton`; g.fillStyle=color; g.textAlign=align; g.textBaseline='alphabetic'; g.fillText(text,x,s*1.15);
   seed=11+text.length; g.globalCompositeOperation='destination-out';
   for(let i=0;i<1400;i++){ const r=rnd()*2.6+.4; g.globalAlpha=.35+rnd()*.65; g.beginPath(); g.arc(rnd()*W,rnd()*l.height,r,0,7); g.fill(); }
   for(let i=0;i<90;i++){ g.globalAlpha=.5; g.fillRect(rnd()*W,rnd()*l.height,rnd()*14+3,1.5); }
@@ -326,9 +326,11 @@ function drawTexts(){ textBoxes=[];
     // shrink a line that would not fit the width of the visual
     ctx.font=`${t.size}px Anton`; const wide=Math.max(...lines.map(l=>ctx.measureText(l).width)); const size=wide>W-60?Math.floor(t.size*(W-60)/wide):t.size;
     const lh=size*1.08, y0=t.y-(lines.length-1)*lh/2; let mw=0;
-    ctx.save(); ctx.font=`${size}px Anton`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=t.color;
-    ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=14; ctx.shadowOffsetY=3;
-    lines.forEach((l,i)=>{ ctx.fillText(l,t.x,y0+i*lh); mw=Math.max(mw,ctx.measureText(l).width); }); ctx.restore();
+    ctx.font=`${size}px Anton`; lines.forEach(l=>mw=Math.max(mw,ctx.measureText(l).width));
+    lines.forEach((l,i)=>{ const yc=y0+i*lh, base=yc+size*.36; // Anton caps sit ~0.36em under the line centre
+      if(t.style==='net'){ ctx.save(); ctx.font=`${size}px Anton`; ctx.textAlign='center'; ctx.fillStyle=t.color;
+        ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=14; ctx.shadowOffsetY=3; ctx.fillText(l,t.x,base); ctx.restore(); }
+      else grunge(l,t.x,base,size,'center',W-60,t.color); });
     const b={id:t.id,x:t.x-mw/2-24,y:y0-lh/2-16,w:mw+48,h:lines.length*lh+32}; textBoxes.push(b);
     if(adjusting){ ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=4; ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h); ctx.restore(); } }); }
 function drawTextList(){
@@ -336,15 +338,20 @@ function drawTextList(){
     <div class="thead"><span>Texte ${i+1}</span><button type="button" class="del" data-tx="del" aria-label="Supprimer le texte ${i+1}">✕</button></div>
     <textarea rows="2" data-tx="text" placeholder="Ton texte (Entrée pour aller à la ligne)" aria-label="Texte ${i+1}">${esc(t.text)}</textarea>
     <div class="trow"><label class="tsize">Taille<input type="range" data-tx="size" min="28" max="180" step="2" value="${t.size}"></label>
-      <div class="chips" role="group" aria-label="Couleur">${TEXT_COLORS.map(([c,n])=>`<button type="button" class="chip" data-tx="color" data-c="${c}" style="--c:${c}" aria-label="${n}" aria-pressed="${t.color===c}"></button>`).join('')}</div></div>
+      <div class="chips" role="group" aria-label="Couleur">${TEXT_COLORS.map(([c,n])=>`<button type="button" class="chip" data-tx="color" data-c="${c}" style="--c:${c}" aria-label="${n}" title="${n}" aria-pressed="${t.color===c}"></button>`).join('')}
+        <label class="chip any" title="Toutes les couleurs" aria-pressed="${!TEXT_COLORS.some(([c])=>c===t.color)}" style="--c:${t.color}"><input type="color" data-tx="pick" value="${t.color}" aria-label="Choisir une autre couleur"></label></div></div>
+    <div class="seg tstyle" role="group" aria-label="Style du texte"><button type="button" data-tx="style" data-s="grunge" aria-pressed="${t.style!=='net'}">Usé (comme le titre)</button><button type="button" data-tx="style" data-s="net" aria-pressed="${t.style==='net'}">Net</button></div>
   </div>`).join('');
   $('adjBtn').hidden=!canAdjust()||adjusting; }
-$('textAdd').addEventListener('click',()=>{ const t={id:uid(),text:'',size:90,color:'#ffffff',x:W/2,y:Math.round(H*.45)}; texts.push(t); drawTextList(); render();
+$('textAdd').addEventListener('click',()=>{ const t={id:uid(),text:'',size:90,color:'#ffffff',style:'grunge',x:W/2,y:Math.round(H*.32)+(texts.length%5)*130}; texts.push(t); drawTextList(); render();
   const ta=$('textList').querySelector(`[data-tid="${t.id}"] textarea`); ta.focus(); });
 $('textList').addEventListener('input',e=>{ const card=e.target.closest('[data-tid]'); if(!card) return; const t=texts.find(x=>x.id===card.dataset.tid);
-  if(e.target.dataset.tx==='text') t.text=e.target.value; if(e.target.dataset.tx==='size') t.size=+e.target.value; reRender(); });
+  if(e.target.dataset.tx==='text') t.text=e.target.value; if(e.target.dataset.tx==='size') t.size=+e.target.value;
+  if(e.target.dataset.tx==='pick'){ t.color=e.target.value; const any=e.target.parentElement; any.style.setProperty('--c',t.color); any.setAttribute('aria-pressed',true); card.querySelectorAll('button.chip').forEach(c=>c.setAttribute('aria-pressed',false)); }
+  reRender(); });
 $('textList').addEventListener('click',e=>{ const b=e.target.closest('button[data-tx]'); if(!b) return; const card=b.closest('[data-tid]'); const t=texts.find(x=>x.id===card.dataset.tid);
   if(b.dataset.tx==='color'){ t.color=b.dataset.c; card.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b)); }
+  if(b.dataset.tx==='style'){ t.style=b.dataset.s; card.querySelectorAll('[data-tx=style]').forEach(c=>c.setAttribute('aria-pressed',c===b)); }
   if(b.dataset.tx==='del'){ texts=texts.filter(x=>x!==t); drawTextList(); }
   render(); });
 
