@@ -100,7 +100,7 @@ function contain(im,cx,cy,bw,bh){ const r=Math.min(bw/im.width,bh/im.height); ct
 const PHOTO_BOTTOM=980; // canvas y (4:5 layout): the photo is framed so its bottom sits just above the score plate
 const PHOTO_EXT=1120;   // the photo is still painted down to here, behind the plate and the waves
 function backdrop(){
-  if(photo){ if(photo!==adjPhoto){ adj={z:1,dx:0,dy:0}; adjPhoto=photo; $('adjZoom').value=1; }
+  if(photo){ if(photo!==adjPhoto){ adj={z:1,dx:0,dy:0}; adjPhoto=photo; }
     // the photo fills the area above the score plate (PH), so nothing important hides behind it
     const PH=PHOTO_BOTTOM+(H-1350);
     ctx.fillStyle=C.navy2; ctx.fillRect(0,0,W,H);
@@ -167,9 +167,9 @@ function oppMark(){
 function infoLines(o,lines,size){ ctx.save(); ctx.translate(0,o); ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.shadowColor='rgba(0,0,0,.3)'; ctx.shadowBlur=6;
   lines.forEach((t,i)=>{ const s=fit(ctx,t,390,size,'Anton'); ctx.font=`${s}px Anton`; ctx.fillText(t,672,1194+i*(size+4)); }); ctx.restore(); }
 
-let photo=null, adj={z:1,dx:0,dy:0}, adjPhoto=null, texts=[], textBoxes=[];
+let photo=null, adj={z:1,dx:0,dy:0}, adjPhoto=null, texts=[], textBoxes=[], exporting=false;
 async function render(){
-  photo=await currentPhoto(); photoInfo(); $('adjBtn').hidden=!canAdjust()||adjusting; if(!canAdjust()&&adjusting) setAdjust(false); $('zoomL').hidden=!photo;
+  photo=await currentPhoto(); photoInfo(); if(!photo&&adjusting){ adjusting=false; } syncMoveUI();
   cv.width=W; cv.height=H; const o=H-1350, top=H===1920?150:0;
   backdrop(); waves(o);
   const title=comp().toUpperCase();
@@ -256,7 +256,8 @@ let downloads=null;
 if(window.claude&&window.claude.use){ window.claude.use('downloads').then(d=>{ downloads=d; if(d) $('dl').hidden=false; }).catch(()=>{}); }
 else { $('dl').hidden=false; } // standalone page: plain browser download
 const fname=()=>`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`;
-$('dl').addEventListener('click',()=>{ if(adjusting){ setAdjust(false); render().then(()=>$('dl').click()); return; } if(scoreBlocked()){ toast('Corrige le score avant de télécharger'); setGrid.scrollIntoView({behavior:'smooth',block:'center'}); return; } if(!downloads){ cv.toBlob(blob=>{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); },'image/jpeg',.93); return; } cv.toBlob(async blob=>{ try{ await downloads.save({filename:`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`,data:blob}); toast('Image enregistrée'); }catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } $('dl').hidden=true; toast('Téléchargement indisponible ici : appui long sur l\'image'); } },'image/jpeg',.93); });
+$('dl').addEventListener('click',()=>{ if(!exporting&&(adjusting||activeText)){ exporting=true; render().then(()=>{ $('dl').click(); }); return; } if(scoreBlocked()){ exporting=false; render(); toast('Corrige le score avant de télécharger'); setGrid.scrollIntoView({behavior:'smooth',block:'center'}); return; } if(!downloads){ cv.toBlob(blob=>{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); },'image/jpeg',.93); afterExport(); return; } cv.toBlob(async blob=>{ try{ await downloads.save({filename:`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`,data:blob}); toast('Image enregistrée'); }catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } $('dl').hidden=true; toast('Téléchargement indisponible ici : appui long sur l\'image'); } },'image/jpeg',.93); afterExport(); });
+function afterExport(){ if(exporting){ exporting=false; render(); } }
 
 // ---------- score grid ----------
 // One row per set (Griffons | adversaire). Sets 4 and 5 only appear while the match is undecided.
@@ -289,28 +290,33 @@ setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) retu
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });
 setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=3);
 
-// ---------- photo framing ----------
-// "Ajuster la photo": drag to move, pinch / slider / wheel to zoom. Offsets are in canvas pixels.
-let adjusting=false, adjRaf=0;
+// ---------- photo framing & moving texts ----------
+// "Ajuster la photo": drag to move it, pinch or wheel to zoom. An open text (activeText) can be dragged
+// straight away on the preview; tapping a text on the preview opens it. Offsets are in canvas pixels.
+let adjusting=false, activeText=null, adjRaf=0;
 const frame=document.querySelector('.frame'), outImg=$('out');
 const reRender=()=>{ if(!adjRaf) adjRaf=requestAnimationFrame(()=>{ adjRaf=0; render(); }); };
-const canAdjust=()=>!!photo||texts.length>0;
-function setAdjust(v){ adjusting=v; frame.classList.toggle('adjusting',v); $('adjBar').hidden=!v; $('adjBtn').hidden=v||!canAdjust(); if(!v){ ptrs.clear(); drag=null; } render(); }
-function zoomTo(z){ const old=adj.z; adj.z=Math.min(4,Math.max(1,z)); const k=adj.z/old; adj.dx*=k; adj.dy*=k; $('adjZoom').value=adj.z; reRender(); }
+const canAdjust=()=>!!photo;
+function syncMoveUI(){ frame.classList.toggle('adjusting',adjusting||!!activeText); $('adjBtn').hidden=adjusting||!canAdjust(); $('adjDone').hidden=!adjusting; }
+function setAdjust(v){ adjusting=v; if(v) activeText=null; if(!v){ ptrs.clear(); drag=null; } drawTextList(); syncMoveUI(); render(); }
+function setActive(id){ activeText=id; if(id) adjusting=false; drawTextList(); syncMoveUI(); render(); }
+function zoomTo(z){ const old=adj.z; adj.z=Math.min(4,Math.max(1,z)); const k=adj.z/old; adj.dx*=k; adj.dy*=k; reRender(); }
 $('adjBtn').addEventListener('click',()=>setAdjust(true));
 $('adjDone').addEventListener('click',()=>setAdjust(false));
-$('adjReset').addEventListener('click',()=>{ adj={z:1,dx:0,dy:0}; $('adjZoom').value=1; reRender(); });
-$('adjZoom').addEventListener('input',e=>zoomTo(+e.target.value));
 const ptrs=new Map(); let pinch0=0, zoom0=1;
 // the preview <img> may be letterboxed (object-fit: contain), so map from its real content box
 function toCanvas(e){ const r=outImg.getBoundingClientRect(), cw=Math.min(r.width,r.height*W/H), ch=cw*H/W;
   return {x:(e.clientX-r.left-(r.width-cw)/2)*W/cw, y:(e.clientY-r.top-(r.height-ch)/2)*H/ch}; }
 const scale=()=>{ const r=outImg.getBoundingClientRect(); return W/Math.min(r.width,r.height*W/H); };
 let drag=null; // a text id while dragging a text, 'photo' while dragging the photo
-outImg.addEventListener('pointerdown',e=>{ if(!adjusting) return; e.preventDefault(); outImg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(ptrs.size===1){ const c=toCanvas(e), hit=textBoxes.slice().reverse().find(b=>c.x>=b.x&&c.x<=b.x+b.w&&c.y>=b.y&&c.y<=b.y+b.h); drag=hit?hit.id:(photo?'photo':null); }
-  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; } });
-outImg.addEventListener('pointermove',e=>{ if(!adjusting||!ptrs.has(e.pointerId)) return; const p=ptrs.get(e.pointerId);
+outImg.addEventListener('pointerdown',e=>{
+  const c=toCanvas(e), hit=textBoxes.slice().reverse().find(b=>c.x>=b.x&&c.x<=b.x+b.w&&c.y>=b.y&&c.y<=b.y+b.h);
+  if(hit&&!adjusting&&hit.id!==activeText) setActive(hit.id); // tap a text on the preview: open it
+  if(!adjusting&&!activeText) return;
+  e.preventDefault(); outImg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1) drag=hit?hit.id:(adjusting&&photo?'photo':null);
+  if(ptrs.size===2&&adjusting){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; } });
+outImg.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; const p=ptrs.get(e.pointerId);
   if(ptrs.size===1&&drag){ const dx=(e.clientX-p.x)*scale(), dy=(e.clientY-p.y)*scale();
     if(drag==='photo'){ adj.dx+=dx; adj.dy+=dy; } else { const t=texts.find(x=>x.id===drag); if(t){ t.x=Math.min(W,Math.max(0,t.x+dx)); t.y=Math.min(H,Math.max(0,t.y+dy)); } }
     reRender(); }
@@ -332,27 +338,32 @@ function drawTexts(){ textBoxes=[];
         ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=14; ctx.shadowOffsetY=3; ctx.fillText(l,t.x,base); ctx.restore(); }
       else grunge(l,t.x,base,size,'center',W-60,t.color); });
     const b={id:t.id,x:t.x-mw/2-24,y:y0-lh/2-16,w:mw+48,h:lines.length*lh+32}; textBoxes.push(b);
-    if(adjusting){ ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=4; ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h); ctx.restore(); } }); }
+    // dashed frame on the preview only (export re-renders without it)
+    if(!exporting&&(adjusting||t.id===activeText)){ ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=5; ctx.strokeStyle=t.id===activeText?C.yel:'rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h); ctx.restore(); } }); }
 function drawTextList(){
-  $('textList').innerHTML=texts.map((t,i)=>`<div class="tcard" data-tid="${t.id}">
-    <div class="thead"><span>Texte ${i+1}</span><button type="button" class="del" data-tx="del" aria-label="Supprimer le texte ${i+1}">✕</button></div>
-    <textarea rows="2" data-tx="text" placeholder="Ton texte (Entrée pour aller à la ligne)" aria-label="Texte ${i+1}">${esc(t.text)}</textarea>
+  $('textList').innerHTML=texts.map((t,i)=>{ const open=t.id===activeText;
+    return `<div class="tcard${open?' open':''}" data-tid="${t.id}">
+    <div class="thead"><button type="button" class="tsum" data-tx="toggle" aria-expanded="${open}"><span class="dot" style="--c:${t.color}"></span><span class="tprev">${esc(t.text.replace(/\n/g,' ')||'Texte '+(i+1))}</span><span class="chev" aria-hidden="true"></span></button>
+      <button type="button" class="del" data-tx="del" aria-label="Supprimer le texte ${i+1}">✕</button></div>
+    ${open?`<textarea rows="2" data-tx="text" placeholder="Ton texte (Entrée pour aller à la ligne)" aria-label="Texte ${i+1}">${esc(t.text)}</textarea>
     <div class="trow"><label class="tsize">Taille<input type="range" data-tx="size" min="28" max="180" step="2" value="${t.size}"></label>
       <div class="chips" role="group" aria-label="Couleur">${TEXT_COLORS.map(([c,n])=>`<button type="button" class="chip" data-tx="color" data-c="${c}" style="--c:${c}" aria-label="${n}" title="${n}" aria-pressed="${t.color===c}"></button>`).join('')}
         <label class="chip any" title="Toutes les couleurs" aria-pressed="${!TEXT_COLORS.some(([c])=>c===t.color)}" style="--c:${t.color}"><input type="color" data-tx="pick" value="${t.color}" aria-label="Choisir une autre couleur"></label></div></div>
     <div class="seg tstyle" role="group" aria-label="Style du texte"><button type="button" data-tx="style" data-s="grunge" aria-pressed="${t.style!=='net'}">Usé (comme le titre)</button><button type="button" data-tx="style" data-s="net" aria-pressed="${t.style==='net'}">Net</button></div>
-  </div>`).join('');
-  $('adjBtn').hidden=!canAdjust()||adjusting; }
-$('textAdd').addEventListener('click',()=>{ const t={id:uid(),text:'',size:90,color:'#ffffff',style:'grunge',x:W/2,y:Math.round(H*.32)+(texts.length%5)*130}; texts.push(t); drawTextList(); render();
-  const ta=$('textList').querySelector(`[data-tid="${t.id}"] textarea`); ta.focus(); });
+    <p class="small tmove">Fais glisser le texte encadré en jaune sur l'aperçu pour le placer.</p>`:''}
+  </div>`; }).join(''); }
+$('textAdd').addEventListener('click',()=>{ const t={id:uid(),text:'',size:90,color:'#ffffff',style:'grunge',x:W/2,y:Math.round(H*.32)+(texts.length%5)*130}; texts.push(t); setActive(t.id);
+  $('textList').querySelector(`[data-tid="${t.id}"] textarea`).focus(); });
 $('textList').addEventListener('input',e=>{ const card=e.target.closest('[data-tid]'); if(!card) return; const t=texts.find(x=>x.id===card.dataset.tid);
-  if(e.target.dataset.tx==='text') t.text=e.target.value; if(e.target.dataset.tx==='size') t.size=+e.target.value;
-  if(e.target.dataset.tx==='pick'){ t.color=e.target.value; const any=e.target.parentElement; any.style.setProperty('--c',t.color); any.setAttribute('aria-pressed',true); card.querySelectorAll('button.chip').forEach(c=>c.setAttribute('aria-pressed',false)); }
+  if(e.target.dataset.tx==='text'){ t.text=e.target.value; card.querySelector('.tprev').textContent=t.text.replace(/\n/g,' ')||'Texte'; }
+  if(e.target.dataset.tx==='size') t.size=+e.target.value;
+  if(e.target.dataset.tx==='pick'){ t.color=e.target.value; const any=e.target.parentElement; any.style.setProperty('--c',t.color); any.setAttribute('aria-pressed',true); card.querySelectorAll('button.chip').forEach(c=>c.setAttribute('aria-pressed',false)); card.querySelector('.dot').style.setProperty('--c',t.color); }
   reRender(); });
 $('textList').addEventListener('click',e=>{ const b=e.target.closest('button[data-tx]'); if(!b) return; const card=b.closest('[data-tid]'); const t=texts.find(x=>x.id===card.dataset.tid);
-  if(b.dataset.tx==='color'){ t.color=b.dataset.c; card.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b)); }
+  if(b.dataset.tx==='toggle'){ setActive(activeText===t.id?null:t.id); return; }
+  if(b.dataset.tx==='del'){ texts=texts.filter(x=>x!==t); if(activeText===t.id) activeText=null; drawTextList(); syncMoveUI(); render(); return; }
+  if(b.dataset.tx==='color'){ t.color=b.dataset.c; card.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b)); card.querySelector('.dot').style.setProperty('--c',t.color); }
   if(b.dataset.tx==='style'){ t.style=b.dataset.s; card.querySelectorAll('[data-tx=style]').forEach(c=>c.setAttribute('aria-pressed',c===b)); }
-  if(b.dataset.tx==='del'){ texts=texts.filter(x=>x!==t); drawTextList(); }
   render(); });
 
 // ---------- settings sheet ----------
