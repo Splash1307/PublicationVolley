@@ -97,13 +97,17 @@ function grunge(text,x,y,size,align,maxW){
 function contain(im,cx,cy,bw,bh){ const r=Math.min(bw/im.width,bh/im.height); ctx.drawImage(im,cx-im.width*r/2,cy-im.height*r/2,im.width*r,im.height*r); }
 
 // ---------- poster ----------
+const PHOTO_BOTTOM=980; // canvas y (4:5 layout) where the photo stops: just above the score plate
 function backdrop(){
   if(photo){ if(photo!==adjPhoto){ adj={z:1,dx:0,dy:0}; adjPhoto=photo; $('adjZoom').value=1; }
-    const r=Math.max(W/photo.width,H/photo.height)*adj.z, w=photo.width*r, h=photo.height*r;
-    const bx=(W-w)/2, by=Math.min(0,(H-h)*.35);
-    // the photo always covers the whole visual: clamp the offset, then keep the clamped value
-    const x=Math.min(0,Math.max(W-w,bx+adj.dx)), y=Math.min(0,Math.max(H-h,by+adj.dy)); adj.dx=x-bx; adj.dy=y-by;
-    ctx.drawImage(photo,x,y,w,h); }
+    // the photo fills the area above the score plate (PH), so nothing important hides behind it
+    const PH=PHOTO_BOTTOM+(H-1350);
+    ctx.fillStyle=C.navy2; ctx.fillRect(0,0,W,H);
+    const r=Math.max(W/photo.width,PH/photo.height)*adj.z, w=photo.width*r, h=photo.height*r;
+    const bx=(W-w)/2, by=Math.min(0,(PH-h)*.35);
+    // the photo always covers that whole area: clamp the offset, then keep the clamped value
+    const x=Math.min(0,Math.max(W-w,bx+adj.dx)), y=Math.min(0,Math.max(PH-h,by+adj.dy)); adj.dx=x-bx; adj.dy=y-by;
+    ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,PH); ctx.clip(); ctx.drawImage(photo,x,y,w,h); ctx.restore(); }
   else { const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2c6f93'); g.addColorStop(1,'#123049'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     ctx.save(); ctx.globalAlpha=.08; ctx.strokeStyle='#fff'; ctx.lineWidth=3; for(let i=-H;i<W;i+=60){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+H*.5,H); ctx.stroke(); } ctx.restore();
     ctx.fillStyle='rgba(255,255,255,.55)'; ctx.font="600 34px 'Barlow Condensed'"; ctx.textAlign='center'; ctx.fillText('Ajoute la photo de l\'équipe',W/2,H*.42); }
