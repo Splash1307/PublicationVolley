@@ -313,6 +313,7 @@ outImg.addEventListener('pointerdown',e=>{
   const c=toCanvas(e), hit=textBoxes.slice().reverse().find(b=>c.x>=b.x&&c.x<=b.x+b.w&&c.y>=b.y&&c.y<=b.y+b.h);
   const ab=activeText&&textBoxes.find(b=>b.id===activeText), onHandle=ab&&Math.hypot(c.x-ab.hx,c.y-ab.hy)<HANDLE_R*1.8;
   if(hit&&!adjusting&&hit.id!==activeText) setActive(hit.id); // tap a text on the preview: open it
+  else if(!hit&&!onHandle&&activeText&&!adjusting){ setActive(null); return; } // tap an empty spot: stop editing
   if(!adjusting&&!activeText) return;
   e.preventDefault(); outImg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(ptrs.size===1){ if(onHandle){ const t=texts.find(x=>x.id===activeText); drag='size'; size0={t,size:t.size,d:Math.max(20,Math.hypot(c.x-t.x,c.y-t.y))}; }
@@ -361,6 +362,8 @@ function drawTextList(){
     <div class="seg tstyle" role="group" aria-label="Style du texte"><button type="button" data-tx="style" data-s="grunge" aria-pressed="${t.style!=='net'}">Usé (comme le titre)</button><button type="button" data-tx="style" data-s="net" aria-pressed="${t.style==='net'}">Net</button></div>
     <p class="small tmove">Sur l'aperçu : fais glisser le texte encadré en jaune pour le placer, et le rond jaune dans son coin pour l'agrandir ou le réduire (ou pince avec deux doigts).</p>`:''}
   </div>`; }).join(''); }
+document.addEventListener('pointerdown',e=>{ if(!activeText) return; const t=e.target;
+  if(t===outImg||t.closest('#textList')||t.closest('#textAdd')||t.closest('#dl')) return; setActive(null); });
 $('textAdd').addEventListener('click',()=>{ const t={id:uid(),text:'',size:90,color:'#ffffff',style:'grunge',x:W/2,y:Math.round(H*.32)+(texts.length%5)*130}; texts.push(t); setActive(t.id);
   $('textList').querySelector(`[data-tid="${t.id}"] textarea`).focus(); });
 $('textList').addEventListener('input',e=>{ const card=e.target.closest('[data-tid]'); if(!card) return; const t=texts.find(x=>x.id===card.dataset.tid);
