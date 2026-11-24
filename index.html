@@ -25,9 +25,15 @@
 <header class="top">
   <img id="hdrLogo" alt="">
   <h1>Studio posts · Les Griffons</h1>
+  <div class="hdr-actions">
+  <button type="button" class="hbtn" id="resOpen" title="Choisir un match terminé (résultats FFVB)" aria-label="Matchs terminés">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V9h14v10zM7 11h5v5H7z"/></svg>
+    <span>Matchs</span>
+  </button>
   <button type="button" class="gear" id="setOpen" aria-label="Réglages" title="Réglages">
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6a.5.5 0 0 0 .1-.6l-2-3.5a.5.5 0 0 0-.6-.2l-2.5 1a7.3 7.3 0 0 0-1.7-1l-.4-2.6a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4l-.4 2.7a7.3 7.3 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.4a.5.5 0 0 0 .1.6L4.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6a.5.5 0 0 0-.1.6l2 3.5c.1.2.4.3.6.2l2.5-1c.5.4 1.1.7 1.7 1l.4 2.6c0 .3.2.5.5.5h4c.3 0 .5-.2.5-.4l.4-2.7c.6-.3 1.2-.6 1.7-1l2.5 1c.2.1.5 0 .6-.2l2-3.5a.5.5 0 0 0-.1-.6L19.4 13zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
   </button>
+  </div>
   <p>Remplis, télécharge le visuel, publie.</p>
 </header>
 
@@ -45,10 +51,6 @@
 
   <section>
     <div class="panel">
-      <button type="button" class="import" id="resOpen">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V9h14v10zM7 11h5v5H7z"/></svg>
-        <span><b>Choisir un match terminé</b><small>Résultats FFVB : équipe, adversaire et score remplis tout seuls</small></span>
-      </button>
       <!-- « Jour de match » masqué pour le moment : retirer hidden pour le réactiver -->
       <div class="seg" role="group" aria-label="Type de post" hidden>
         <button data-kind="result" aria-pressed="true">Résultat</button>
@@ -106,10 +108,15 @@
   <div class="sheet-in">
     <div class="sheet-head">
       <img src="assets/logos/griffons.webp" alt="" width="40" height="40">
-      <h2 id="resTitle">Résultats</h2>
-      <button type="button" class="close" id="resClose" aria-label="Fermer les résultats">✕</button>
+      <h2 id="resTitle">Matchs</h2>
+      <button type="button" class="close" id="resClose" aria-label="Fermer la page Matchs">✕</button>
     </div>
     <p class="small resintro">Matchs terminés des équipes d'Aizenay, d'après le site de la FFVB. Touche un match pour remplir le visuel. <span id="resMaj"></span></p>
+    <div class="filters">
+      <label>Équipe<select id="fTeam"><option value="">Toutes les équipes</option></select></label>
+      <label>Week-end<select id="fWeek"><option value="">Tous les week-ends</option></select></label>
+      <label>Résultat<select id="fRes"><option value="">Victoires et défaites</option><option value="w">Victoires</option><option value="l">Défaites</option></select></label>
+    </div>
     <div id="resList"></div>
     <button type="button" id="resMore" class="add" hidden>Afficher les week-ends précédents</button>
   </div>
