@@ -81,7 +81,8 @@
         <label data-for="match" id="awayL" class="full" hidden>Salle (extérieur)<input id="awayVenue" placeholder="ex. Salle des sports, Bouffère"></label>
         <div data-for="result" class="full">
           <span class="lbl" id="setsLbl">Score des sets</span>
-          <div class="seg bo" role="group" aria-label="Format du match"><button type="button" data-bo="5" aria-pressed="true">3 sets gagnants</button><button type="button" data-bo="3" aria-pressed="false">2 sets gagnants (coupe)</button></div>
+          <!-- Format détecté à l'import FFVB (2 sets gagnants pour les coupes) ; choix masqué, retirer hidden pour le réafficher -->
+          <div class="seg bo" role="group" aria-label="Format du match" hidden><button type="button" data-bo="5" aria-pressed="true">3 sets gagnants</button><button type="button" data-bo="3" aria-pressed="false">2 sets gagnants (coupe)</button></div>
           <div class="sets" id="setGrid" role="group" aria-labelledby="setsLbl">
             <span></span><span class="sh">Griffons</span><span class="sh" id="setOppName">Adversaire</span>
           </div>
