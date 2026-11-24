@@ -175,6 +175,7 @@ async function render(){
   const title=comp().toUpperCase();
   if(kind==='result'){
     grunge(dmy($('date').value),W-22,top+64,56,'right',360);
+    const cup=$('cupLabel').value.trim(); if(cup) grunge(cup.toUpperCase(),22,top+64,56,'left',W-22-360-40); // ex. « 1ER TOUR COUPE DE VENDÉE »
     grunge(title,W/2,top+186,104,'center',900);
     const sets=parseSets($('sets').value); let a=0,b=0; sets.forEach(([x,y])=>x>y?a++:b++);
     plate(o,()=>clubLogo&&contain(clubLogo,229,1053,150,150),()=>{ ctx.fillStyle=C.navy; ctx.textAlign='center'; ctx.font='150px Anton'; ctx.fillText(`${a} - ${b}`,540,1108); },oppMark);
@@ -199,7 +200,7 @@ function sync(){ $('oppFreeL').hidden=oppId!=='__free'; document.querySelectorAl
 function photoInfo(){ const has=!!teamPhotos[curTeam().id]; $('photoDel').hidden=!matchPhoto; $('photoInfo').textContent=matchPhoto?'Photo du match utilisée.':(has?'':'Pas de photo par défaut pour cette équipe (Réglages du club › Équipes).'); }
 document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{ kind=b.dataset.kind; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x===b)); sync(); render(); }));
 document.querySelectorAll('[data-fmt]').forEach(b=>b.addEventListener('click',()=>{ H=+b.dataset.fmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.setAttribute('aria-pressed',x===b)); render(); }));
-['date','time','home','awayVenue','sets','opp','venue','team'].forEach(id=>$(id).addEventListener('input',()=>{ sync(); if(id==='opp') drawBtn(); render(); if(id==='venue'||id==='team') store(); }));
+['date','time','home','awayVenue','sets','opp','venue','team','cupLabel'].forEach(id=>$(id).addEventListener('input',()=>{ sync(); if(id==='opp') drawBtn(); render(); if(id==='venue'||id==='team') store(); }));
 $('photo').addEventListener('change',async e=>{ const f=e.target.files[0]; if(!f) return; matchPhoto=await img(await shrink(f,1920)); render(); });
 $('photoDel').addEventListener('click',()=>{ matchPhoto=null; $('photo').value=''; render(); });
 
@@ -393,6 +394,12 @@ $('textList').addEventListener('click',e=>{ const b=e.target.closest('button[dat
   render(); });
 
 // ---------- résultats FFVB ----------
+const isCup=m=>/coupe/.test(norm(m.competition))||/^(18[0-9]|A1|B1|CM)/.test(m.poule);
+// « 1er tour Coupe de Vendée Féminine - Poule 4 » → « 1er tour Coupe de Vendée » ; « COUPE DE VENDEE M18 FÉMININ » → « Coupe de Vendée »
+function cupLabel(m){ if(!isCup(m)) return '';
+  let t=String(m.competition||'').split(' - ')[0].replace(/\b(M\d+\s*)?(f[ée]minin[e]?|masculin[e]?)\b/gi,'').replace(/vendee/gi,'Vendée').replace(/\s+/g,' ').trim();
+  t=t.toLowerCase().replace(/coupe de vendée/,'Coupe de Vendée').replace(/^./,c=>c.toUpperCase());
+  return t||'Coupe'; }
 // data/resultats.json est produit par scripts/resultats.mjs (GitHub Actions) à partir du site de la FFVB.
 let results=null, resShown=1; // au départ : seulement le dernier week-end
 const MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
@@ -414,7 +421,7 @@ function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p 
   $('resMaj').textContent=results.maj?`Mis à jour le ${new Date(results.maj).toLocaleString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}`:'';
   if(!ms.length){ box.innerHTML=`<p class="small">${results.erreur?'Impossible de charger les résultats pour le moment.':'Aucun match terminé pour l\'instant.'}</p>`; $('resMore').hidden=true; return; }
   // filtres : équipe, week-end, championnat / coupe
-  const teamOf=m=>m.equipe||cap(m.aizenay), isCup=m=>/coupe/.test(norm(m.competition))||/^(18[0-9]|A1|B1|CM)/.test(m.poule);
+  const teamOf=m=>m.equipe||cap(m.aizenay);
   const fill=(id,vals,label)=>{ const sel=$(id), cur=sel.value; sel.innerHTML=sel.options[0].outerHTML+vals.map(v=>`<option value="${esc(v)}">${esc(label(v))}</option>`).join(''); sel.value=vals.includes(cur)?cur:''; };
   fill('fTeam',[...new Set(ms.map(teamOf))].sort((a,b)=>a.localeCompare(b,'fr')),v=>v);
   fill('fWeek',[...new Set(ms.map(m=>weekendOf(m.date)))],v=>wkLabel(v).replace('Week-end du ',''));
@@ -443,7 +450,7 @@ function applyResult(m){
   const t=m.equipe&&teams.find(x=>norm(x.name)===norm(m.equipe));
   if(t) $('team').value=t.id;
   const o=findOpp(m); if(o){ oppId=o.id; } else { oppId='__free'; $('opp').value=cap(m.adversaire); }
-  $('date').value=m.date;
+  $('date').value=m.date; $('cupLabel').value=cupLabel(m);
   const nums=m.score.map(Number).filter(Number.isFinite); setBestOf(nums.length&&Math.max(...nums)===2?3:5);
   for(let i=0;i<5;i++){ const st=m.sets[i]; cell(i,0).value=st?st[0]:''; cell(i,1).value=st?st[1]:''; }
   drawBtn(); drawPicker(); sync(); store(); syncSets(); loadOpp().then(render);
@@ -462,7 +469,7 @@ $('resMore').addEventListener('click',()=>{ resShown+=1; drawResults(); });
 function newBlank(){
   kind='result'; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.kind==='result'));
   matchPhoto=null; $('photo').value=''; oppId=null; $('opp').value='';
-  $('date').value=new Date().toISOString().slice(0,10);
+  $('date').value=new Date().toISOString().slice(0,10); $('cupLabel').value='';
   for(let i=0;i<5;i++){ cell(i,0).value=''; cell(i,1).value=''; }
   texts=[]; activeText=null; adjusting=false; drawTextList();
   drawBtn(); drawPicker(); sync(); store(); setBestOf(5); openMatch(true); loadOpp().then(render);
