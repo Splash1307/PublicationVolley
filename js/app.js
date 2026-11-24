@@ -308,24 +308,29 @@ const ptrs=new Map(); let pinch0=0, zoom0=1;
 function toCanvas(e){ const r=outImg.getBoundingClientRect(), cw=Math.min(r.width,r.height*W/H), ch=cw*H/W;
   return {x:(e.clientX-r.left-(r.width-cw)/2)*W/cw, y:(e.clientY-r.top-(r.height-ch)/2)*H/ch}; }
 const scale=()=>{ const r=outImg.getBoundingClientRect(); return W/Math.min(r.width,r.height*W/H); };
-let drag=null; // a text id while dragging a text, 'photo' while dragging the photo
+let drag=null, size0=null; // drag: a text id (move it), 'size' (resize the open text) or 'photo'
 outImg.addEventListener('pointerdown',e=>{
   const c=toCanvas(e), hit=textBoxes.slice().reverse().find(b=>c.x>=b.x&&c.x<=b.x+b.w&&c.y>=b.y&&c.y<=b.y+b.h);
+  const ab=activeText&&textBoxes.find(b=>b.id===activeText), onHandle=ab&&Math.hypot(c.x-ab.hx,c.y-ab.hy)<HANDLE_R*1.8;
   if(hit&&!adjusting&&hit.id!==activeText) setActive(hit.id); // tap a text on the preview: open it
   if(!adjusting&&!activeText) return;
   e.preventDefault(); outImg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(ptrs.size===1) drag=hit?hit.id:(adjusting&&photo?'photo':null);
-  if(ptrs.size===2&&adjusting){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; } });
+  if(ptrs.size===1){ if(onHandle){ const t=texts.find(x=>x.id===activeText); drag='size'; size0={t,size:t.size,d:Math.max(20,Math.hypot(c.x-t.x,c.y-t.y))}; }
+    else drag=hit?hit.id:(adjusting&&photo?'photo':null); }
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; const t=activeText&&texts.find(x=>x.id===activeText); if(t) size0={t,size:t.size}; drag=null; } });
 outImg.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; const p=ptrs.get(e.pointerId);
+  if(ptrs.size===1&&drag==='size'){ const c=toCanvas(e), t=size0.t; t.size=Math.round(Math.min(TEXT_MAX,Math.max(TEXT_MIN,size0.size*Math.hypot(c.x-t.x,c.y-t.y)/size0.d))); reRender(); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); return; }
   if(ptrs.size===1&&drag){ const dx=(e.clientX-p.x)*scale(), dy=(e.clientY-p.y)*scale();
     if(drag==='photo'){ adj.dx+=dx; adj.dy+=dy; } else { const t=texts.find(x=>x.id===drag); if(t){ t.x=Math.min(W,Math.max(0,t.x+dx)); t.y=Math.min(H,Math.max(0,t.y+dy)); } }
     reRender(); }
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(ptrs.size===2&&pinch0&&photo){ const [a,b]=[...ptrs.values()]; zoomTo(zoom0*Math.hypot(a.x-b.x,a.y-b.y)/pinch0); } });
+  if(ptrs.size===2&&pinch0){ const [a,b]=[...ptrs.values()], k=Math.hypot(a.x-b.x,a.y-b.y)/pinch0;
+    if(activeText&&size0){ size0.t.size=Math.round(Math.min(TEXT_MAX,Math.max(TEXT_MIN,size0.size*k))); reRender(); } else if(adjusting&&photo) zoomTo(zoom0*k); } });
 ['pointerup','pointercancel'].forEach(t=>outImg.addEventListener(t,e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch0=0; if(!ptrs.size) drag=null; }));
 outImg.addEventListener('wheel',e=>{ if(!adjusting||!photo) return; e.preventDefault(); zoomTo(adj.z*(e.deltaY<0?1.08:1/1.08)); },{passive:false});
 
 // ---------- free texts ----------
+const HANDLE_R=30, TEXT_MIN=28, TEXT_MAX=320;
 const TEXT_COLORS=[['#ffffff','Blanc'],[C.yel,'Jaune'],[C.sky,'Bleu ciel'],[C.navy,'Bleu marine']];
 function drawTexts(){ textBoxes=[];
   texts.forEach(t=>{ if(!t.text.trim()) return; const lines=t.text.split('\n');
@@ -337,26 +342,29 @@ function drawTexts(){ textBoxes=[];
       if(t.style==='net'){ ctx.save(); ctx.font=`${size}px Anton`; ctx.textAlign='center'; ctx.fillStyle=t.color;
         ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=14; ctx.shadowOffsetY=3; ctx.fillText(l,t.x,base); ctx.restore(); }
       else grunge(l,t.x,base,size,'center',W-60,t.color); });
-    const b={id:t.id,x:t.x-mw/2-24,y:y0-lh/2-16,w:mw+48,h:lines.length*lh+32}; textBoxes.push(b);
+    const b={id:t.id,x:t.x-mw/2-24,y:y0-lh/2-16,w:mw+48,h:lines.length*lh+32}; b.hx=Math.min(b.x+b.w,W-HANDLE_R-6); b.hy=Math.min(b.y+b.h,H-HANDLE_R-6); textBoxes.push(b);
     // dashed frame on the preview only (export re-renders without it)
-    if(!exporting&&(adjusting||t.id===activeText)){ ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=5; ctx.strokeStyle=t.id===activeText?C.yel:'rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h); ctx.restore(); } }); }
+    if(!exporting&&(adjusting||t.id===activeText)){ ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=5; ctx.strokeStyle=t.id===activeText?C.yel:'rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h);
+      if(t.id===activeText){ // resize handle, bottom-right corner
+        ctx.setLineDash([]); ctx.fillStyle=C.yel; ctx.strokeStyle=C.navy; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(b.hx,b.hy,HANDLE_R,0,7); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(b.hx-11,b.hy+11); ctx.lineTo(b.hx+11,b.hy-11); ctx.moveTo(b.hx+3,b.hy-11); ctx.lineTo(b.hx+11,b.hy-11); ctx.lineTo(b.hx+11,b.hy-3);
+        ctx.moveTo(b.hx-11,b.hy+3); ctx.lineTo(b.hx-11,b.hy+11); ctx.lineTo(b.hx-3,b.hy+11); ctx.stroke(); }
+      ctx.restore(); } }); }
 function drawTextList(){
   $('textList').innerHTML=texts.map((t,i)=>{ const open=t.id===activeText;
     return `<div class="tcard${open?' open':''}" data-tid="${t.id}">
     <div class="thead"><button type="button" class="tsum" data-tx="toggle" aria-expanded="${open}"><span class="dot" style="--c:${t.color}"></span><span class="tprev">${esc(t.text.replace(/\n/g,' ')||'Texte '+(i+1))}</span><span class="chev" aria-hidden="true"></span></button>
       <button type="button" class="del" data-tx="del" aria-label="Supprimer le texte ${i+1}">✕</button></div>
     ${open?`<textarea rows="2" data-tx="text" placeholder="Ton texte (Entrée pour aller à la ligne)" aria-label="Texte ${i+1}">${esc(t.text)}</textarea>
-    <div class="trow"><label class="tsize">Taille<input type="range" data-tx="size" min="28" max="180" step="2" value="${t.size}"></label>
-      <div class="chips" role="group" aria-label="Couleur">${TEXT_COLORS.map(([c,n])=>`<button type="button" class="chip" data-tx="color" data-c="${c}" style="--c:${c}" aria-label="${n}" title="${n}" aria-pressed="${t.color===c}"></button>`).join('')}
+    <div class="trow"><div class="chips" role="group" aria-label="Couleur">${TEXT_COLORS.map(([c,n])=>`<button type="button" class="chip" data-tx="color" data-c="${c}" style="--c:${c}" aria-label="${n}" title="${n}" aria-pressed="${t.color===c}"></button>`).join('')}
         <label class="chip any" title="Toutes les couleurs" aria-pressed="${!TEXT_COLORS.some(([c])=>c===t.color)}" style="--c:${t.color}"><input type="color" data-tx="pick" value="${t.color}" aria-label="Choisir une autre couleur"></label></div></div>
     <div class="seg tstyle" role="group" aria-label="Style du texte"><button type="button" data-tx="style" data-s="grunge" aria-pressed="${t.style!=='net'}">Usé (comme le titre)</button><button type="button" data-tx="style" data-s="net" aria-pressed="${t.style==='net'}">Net</button></div>
-    <p class="small tmove">Fais glisser le texte encadré en jaune sur l'aperçu pour le placer.</p>`:''}
+    <p class="small tmove">Sur l'aperçu : fais glisser le texte encadré en jaune pour le placer, et le rond jaune dans son coin pour l'agrandir ou le réduire (ou pince avec deux doigts).</p>`:''}
   </div>`; }).join(''); }
 $('textAdd').addEventListener('click',()=>{ const t={id:uid(),text:'',size:90,color:'#ffffff',style:'grunge',x:W/2,y:Math.round(H*.32)+(texts.length%5)*130}; texts.push(t); setActive(t.id);
   $('textList').querySelector(`[data-tid="${t.id}"] textarea`).focus(); });
 $('textList').addEventListener('input',e=>{ const card=e.target.closest('[data-tid]'); if(!card) return; const t=texts.find(x=>x.id===card.dataset.tid);
   if(e.target.dataset.tx==='text'){ t.text=e.target.value; card.querySelector('.tprev').textContent=t.text.replace(/\n/g,' ')||'Texte'; }
-  if(e.target.dataset.tx==='size') t.size=+e.target.value;
   if(e.target.dataset.tx==='pick'){ t.color=e.target.value; const any=e.target.parentElement; any.style.setProperty('--c',t.color); any.setAttribute('aria-pressed',true); card.querySelectorAll('button.chip').forEach(c=>c.setAttribute('aria-pressed',false)); card.querySelector('.dot').style.setProperty('--c',t.color); }
   reRender(); });
 $('textList').addEventListener('click',e=>{ const b=e.target.closest('button[data-tx]'); if(!b) return; const card=b.closest('[data-tid]'); const t=texts.find(x=>x.id===card.dataset.tid);
