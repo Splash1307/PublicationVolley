@@ -162,3 +162,14 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .chip.any:focus-within{outline:3px solid var(--sky);outline-offset:2px}
 .tstyle{margin:10px 0 0}
 .tstyle button{font-size:15px}
+/* fiches texte repliables */
+.tcard{padding:8px 8px 8px 12px}
+.tcard.open{padding:12px;border-color:var(--yel)}
+.thead{gap:8px;margin:0}
+.tcard.open .thead{margin-bottom:10px}
+.tsum{flex:1;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:0 4px;text-align:left;min-width:0}
+.tsum .dot{width:22px;height:22px;flex:none;border-radius:50%;background:var(--c);border:2px solid var(--line)}
+.tsum .tprev{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.tsum .chev{flex:none;width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s}
+.tsum[aria-expanded=true] .chev{transform:rotate(-135deg)}
+.tmove{margin:10px 0 0}
