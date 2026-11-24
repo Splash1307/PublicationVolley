@@ -45,6 +45,10 @@
 
   <section>
     <div class="panel">
+      <button type="button" class="import" id="resOpen">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V9h14v10zM7 11h5v5H7z"/></svg>
+        <span><b>Choisir un match terminé</b><small>Résultats FFVB : équipe, adversaire et score remplis tout seuls</small></span>
+      </button>
       <!-- « Jour de match » masqué pour le moment : retirer hidden pour le réactiver -->
       <div class="seg" role="group" aria-label="Type de post" hidden>
         <button data-kind="result" aria-pressed="true">Résultat</button>
@@ -77,6 +81,7 @@
         <label data-for="match" id="awayL" class="full" hidden>Salle (extérieur)<input id="awayVenue" placeholder="ex. Salle des sports, Bouffère"></label>
         <div data-for="result" class="full">
           <span class="lbl" id="setsLbl">Score des sets</span>
+          <div class="seg bo" role="group" aria-label="Format du match"><button type="button" data-bo="5" aria-pressed="true">3 sets gagnants</button><button type="button" data-bo="3" aria-pressed="false">2 sets gagnants (coupe)</button></div>
           <div class="sets" id="setGrid" role="group" aria-labelledby="setsLbl">
             <span></span><span class="sh">Griffons</span><span class="sh" id="setOppName">Adversaire</span>
           </div>
@@ -96,6 +101,18 @@
 
   </section>
 </main>
+<div class="sheet" id="results" role="dialog" aria-modal="true" aria-labelledby="resTitle" hidden>
+  <div class="sheet-in">
+    <div class="sheet-head">
+      <img src="assets/logos/griffons.webp" alt="" width="40" height="40">
+      <h2 id="resTitle">Résultats</h2>
+      <button type="button" class="close" id="resClose" aria-label="Fermer les résultats">✕</button>
+    </div>
+    <p class="small resintro">Matchs terminés des équipes d'Aizenay, d'après le site de la FFVB. Touche un match pour remplir le visuel. <span id="resMaj"></span></p>
+    <div id="resList"></div>
+    <button type="button" id="resMore" class="add" hidden>Afficher les week-ends précédents</button>
+  </div>
+</div>
 <div class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="setTitle" hidden>
   <div class="sheet-in">
     <div class="sheet-head">

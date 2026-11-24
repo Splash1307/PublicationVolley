@@ -1,0 +1,1650 @@
+{
+ "maj": "2026-11-24T10:43:45.265Z",
+ "saison": "2026/2027",
+ "source": "FFVB - Gestion Sportive",
+ "matchs": [
+  {
+   "code": "DMAA031",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-11-22",
+   "heure": "13:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "OYA VOLLEY-BALL",
+   "adversaireClub": "0859365",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     25,
+     22
+    ],
+    [
+     18,
+     25
+    ],
+    [
+     17,
+     25
+    ],
+    [
+     22,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 2"
+  },
+  {
+   "code": "DFAA022",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-11-22",
+   "heure": "10:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 1",
+   "adversaire": "MAREUIL SPORTING CLUB",
+   "adversaireClub": "0857789",
+   "score": [
+    "3",
+    "F"
+   ],
+   "sets": [
+    [
+     25,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     25,
+     0
+    ]
+   ],
+   "forfait": true,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 1"
+  },
+  {
+   "code": "DMAA032",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-11-21",
+   "heure": "19:30",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "MAREUIL SPORTING CLUB",
+   "adversaireClub": "0857789",
+   "score": [
+    "2",
+    "3"
+   ],
+   "sets": [
+    [
+     26,
+     24
+    ],
+    [
+     22,
+     25
+    ],
+    [
+     25,
+     27
+    ],
+    [
+     25,
+     14
+    ],
+    [
+     12,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "OMNISPORTS",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "R2MA024",
+   "entite": "LIPL",
+   "poule": "R2M",
+   "date": "2026-11-21",
+   "heure": "18:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "SPORTING CLUB DE L OUEST 3",
+   "adversaireClub": "0491492",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     25,
+     19
+    ],
+    [
+     17,
+     25
+    ],
+    [
+     17,
+     25
+    ],
+    [
+     22,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "CENTRE SPORTIF DE LA ROSERAIE",
+   "competition": "REGIONALE 2 MASCULINE PAYS DE LA LOIRE",
+   "equipe": "Régionale Masculine"
+  },
+  {
+   "code": "150027",
+   "entite": "PTPL85",
+   "poule": "150",
+   "date": "2026-11-21",
+   "heure": "14:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "LES SABLES VOLLEY VENDEE 2",
+   "adversaireClub": "0854977",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     24,
+     26
+    ],
+    [
+     19,
+     25
+    ],
+    [
+     22,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "GYMNASE DU CENTRE",
+   "competition": "M15F 4x4",
+   "equipe": "M15 Féminine"
+  },
+  {
+   "code": "184A00",
+   "entite": "PTPL85",
+   "poule": "184",
+   "date": "2026-11-15",
+   "heure": "16:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "EHVB 2",
+   "adversaireClub": "0857966",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     4
+    ],
+    [
+     25,
+     8
+    ],
+    [
+     25,
+     14
+    ]
+   ],
+   "forfait": false,
+   "salle": "FRANCK SORIN",
+   "competition": "COUPE DE VENDEE M18 FÉMININ",
+   "equipe": "M18 Féminine"
+  },
+  {
+   "code": "DMAA043",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-11-15",
+   "heure": "13:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "OYA VOLLEY-BALL",
+   "adversaireClub": "0859365",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     12,
+     25
+    ],
+    [
+     15,
+     25
+    ],
+    [
+     23,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "150025",
+   "entite": "PTPL85",
+   "poule": "150",
+   "date": "2026-11-15",
+   "heure": "13:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "VOLLEY-BALL RIEZ VIE",
+   "adversaireClub": "0854984",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     17,
+     25
+    ],
+    [
+     18,
+     25
+    ],
+    [
+     25,
+     17
+    ],
+    [
+     19,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE DE LA FAYE",
+   "competition": "M15F 4x4",
+   "equipe": "M15 Féminine"
+  },
+  {
+   "code": "DMAA044",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-11-15",
+   "heure": "10:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "VOLLEY CLUB FONTENAISIEN 2",
+   "adversaireClub": "0855490",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     13
+    ],
+    [
+     25,
+     11
+    ],
+    [
+     25,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 2"
+  },
+  {
+   "code": "8M1A016",
+   "entite": "PTPL49",
+   "poule": "8M1",
+   "date": "2026-11-14",
+   "heure": "14:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "LA ROCHE/YON VOLLEY-BALL",
+   "adversaireClub": "0858891",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     11,
+     25
+    ],
+    [
+     11,
+     25
+    ],
+    [
+     18,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "CHAMPIONNAT 18M 6x6",
+   "equipe": "M18 Masculine"
+  },
+  {
+   "code": "18AA015",
+   "entite": "PTPL85",
+   "poule": "18A",
+   "date": "2026-11-14",
+   "heure": "14:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "CHALLANS 3",
+   "adversaireClub": "0858798",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     30,
+     28
+    ],
+    [
+     25,
+     12
+    ],
+    [
+     25,
+     17
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "M18 FEMININE Poule A",
+   "equipe": "M18 Féminine"
+  },
+  {
+   "code": "DMAA029",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-11-08",
+   "heure": "13:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "MONTAIGU-VENDEE BOUFFERE VOLLEY-BALL 2",
+   "adversaireClub": "0857865",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     19,
+     25
+    ],
+    [
+     21,
+     25
+    ],
+    [
+     25,
+     23
+    ],
+    [
+     21,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "DMAA030",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-11-08",
+   "heure": "10:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "MAREUIL SPORTING CLUB",
+   "adversaireClub": "0857789",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     17
+    ],
+    [
+     25,
+     13
+    ],
+    [
+     25,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 2"
+  },
+  {
+   "code": "R2MA017",
+   "entite": "LIPL",
+   "poule": "R2M",
+   "date": "2026-11-07",
+   "heure": "21:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "JEUNESSE SPORT COULAINES",
+   "adversaireClub": "0724695",
+   "score": [
+    "3",
+    "1"
+   ],
+   "sets": [
+    [
+     25,
+     22
+    ],
+    [
+     25,
+     22
+    ],
+    [
+     22,
+     25
+    ],
+    [
+     25,
+     13
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "REGIONALE 2 MASCULINE PAYS DE LA LOIRE",
+   "equipe": "Régionale Masculine"
+  },
+  {
+   "code": "DFAA020",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-11-07",
+   "heure": "18:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "AIZENAY VOLLEY-BALL 1",
+   "adversaireClub": "0856001",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     19,
+     25
+    ],
+    [
+     17,
+     25
+    ],
+    [
+     22,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 2"
+  },
+  {
+   "code": "8M1A010",
+   "entite": "PTPL49",
+   "poule": "8M1",
+   "date": "2026-11-07",
+   "heure": "16:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "SPORTING CLUB DE L OUEST",
+   "adversaireClub": "0491492",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     8,
+     25
+    ],
+    [
+     14,
+     25
+    ],
+    [
+     17,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE JEAN ROUSSEAU",
+   "competition": "CHAMPIONNAT 18M 6x6",
+   "equipe": "M18 Masculine"
+  },
+  {
+   "code": "18AA011",
+   "entite": "PTPL85",
+   "poule": "18A",
+   "date": "2026-11-07",
+   "heure": "16:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "LA ROCHE/YON VOLLEY-BALL",
+   "adversaireClub": "0858891",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     8
+    ],
+    [
+     25,
+     18
+    ],
+    [
+     25,
+     19
+    ]
+   ],
+   "forfait": false,
+   "salle": "MENDES FRANCE",
+   "competition": "M18 FEMININE Poule A",
+   "equipe": "M18 Féminine"
+  },
+  {
+   "code": "DMAA021",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-11-01",
+   "heure": "16:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "EVEIL SPORTIF FLORENTIN VOLLEY-BALL 2",
+   "adversaireClub": "0858359",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     12,
+     25
+    ],
+    [
+     17,
+     25
+    ],
+    [
+     19,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE MILLENIUM",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "R2MA015",
+   "entite": "LIPL",
+   "poule": "R2M",
+   "date": "2026-10-31",
+   "heure": "20:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "VOLLEY CLUB CLISSON",
+   "adversaireClub": "0442445",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     25,
+     17
+    ],
+    [
+     18,
+     25
+    ],
+    [
+     14,
+     25
+    ],
+    [
+     14,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "GYMNASE DE LA BLAIRIE",
+   "competition": "REGIONALE 2 MASCULINE PAYS DE LA LOIRE",
+   "equipe": "Régionale Masculine"
+  },
+  {
+   "code": "DMAA020",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-10-31",
+   "heure": "18:30",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "MONTAIGU-VENDEE BOUFFERE VOLLEY-BALL 2",
+   "adversaireClub": "0857865",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     26,
+     24
+    ],
+    [
+     25,
+     20
+    ],
+    [
+     25,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "HALL SPORT",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 2"
+  },
+  {
+   "code": "DFAA014",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-10-31",
+   "heure": "18:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "VOLLEY CLUB FONTENAISIEN",
+   "adversaireClub": "0855490",
+   "score": [
+    "2",
+    "3"
+   ],
+   "sets": [
+    [
+     11,
+     25
+    ],
+    [
+     25,
+     20
+    ],
+    [
+     9,
+     25
+    ],
+    [
+     30,
+     28
+    ],
+    [
+     9,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE DE LA GRANDE PRAIRIE",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 2"
+  },
+  {
+   "code": "A1A001",
+   "entite": "PTPL85",
+   "poule": "A1A",
+   "date": "2026-10-24",
+   "heure": "20:00",
+   "domicile": false,
+   "aizenay": "AIZENAY 2 (Dép)",
+   "adversaire": "STE FLORENCE (Dép)",
+   "adversaireClub": "0858359",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     8,
+     25
+    ],
+    [
+     8,
+     25
+    ],
+    [
+     11,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE MILLENIUM",
+   "competition": "1er tour Coupe de Vendée Féminine - Match 1",
+   "equipe": "Départementale Féminine 2"
+  },
+  {
+   "code": "B1A001",
+   "entite": "PTPL85",
+   "poule": "B1A",
+   "date": "2026-10-24",
+   "heure": "18:00",
+   "domicile": false,
+   "aizenay": "AIZENAY 3 (Dép)",
+   "adversaire": "BOUFFERE 2 (Dép)",
+   "adversaireClub": "0857865",
+   "score": [
+    "0",
+    "2"
+   ],
+   "sets": [
+    [
+     15,
+     25
+    ],
+    [
+     20,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "HALL SPORT",
+   "competition": "1er tour Coupe de Vendée Masculin - Poule 1",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "B1A002",
+   "entite": "PTPL85",
+   "poule": "B1A",
+   "date": "2026-10-24",
+   "heure": "18:00",
+   "domicile": true,
+   "aizenay": "AIZENAY 3 (Dép)",
+   "adversaire": "MAREUIL (Dép)",
+   "adversaireClub": "0857789",
+   "score": [
+    "1",
+    "2"
+   ],
+   "sets": [
+    [
+     25,
+     9
+    ],
+    [
+     22,
+     25
+    ],
+    [
+     8,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "HALL SPORT BOUFFERE",
+   "competition": "1er tour Coupe de Vendée Masculin - Poule 1",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "A1D002",
+   "entite": "PTPL85",
+   "poule": "A1D",
+   "date": "2026-10-24",
+   "heure": "17:00",
+   "domicile": false,
+   "aizenay": "AIZENAY 1 (Dép)",
+   "adversaire": "FONTENAY (Dép)",
+   "adversaireClub": "0855490",
+   "score": [
+    "2",
+    "1"
+   ],
+   "sets": [
+    [
+     25,
+     15
+    ],
+    [
+     22,
+     25
+    ],
+    [
+     15,
+     9
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE DE LA GRANDE PRAIRIE",
+   "competition": "1er tour Coupe de Vendée Féminine - Poule 4",
+   "equipe": "Départementale Féminine 1"
+  },
+  {
+   "code": "DMAA042",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-10-18",
+   "heure": "11:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "AIZENAY VOLLEY-BALL 2",
+   "adversaireClub": "0856001",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     15,
+     25
+    ],
+    [
+     12,
+     25
+    ],
+    [
+     15,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "18AA004",
+   "entite": "PTPL85",
+   "poule": "18A",
+   "date": "2026-10-17",
+   "heure": "14:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "VOLLEY SUD VENDÉE",
+   "adversaireClub": "0859366",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     17
+    ],
+    [
+     25,
+     10
+    ],
+    [
+     25,
+     20
+    ]
+   ],
+   "forfait": false,
+   "salle": "MOULIN ROUGET",
+   "competition": "M18 FEMININE Poule A",
+   "equipe": "M18 Féminine"
+  },
+  {
+   "code": "DMAA016",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-10-11",
+   "heure": "16:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "VENDRENNES VOLLEY-BALL",
+   "adversaireClub": "0858707",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     14,
+     25
+    ],
+    [
+     15,
+     25
+    ],
+    [
+     17,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "DFAA011",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-10-11",
+   "heure": "13:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "CHALLANS VOLLEY-BALL",
+   "adversaireClub": "0858798",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     21,
+     25
+    ],
+    [
+     12,
+     25
+    ],
+    [
+     17,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 2"
+  },
+  {
+   "code": "DMAA017",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-10-11",
+   "heure": "10:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "EVEIL SPORTIF FLORENTIN VOLLEY-BALL 2",
+   "adversaireClub": "0858359",
+   "score": [
+    "2",
+    "3"
+   ],
+   "sets": [
+    [
+     22,
+     25
+    ],
+    [
+     25,
+     15
+    ],
+    [
+     25,
+     23
+    ],
+    [
+     22,
+     25
+    ],
+    [
+     9,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 2"
+  },
+  {
+   "code": "R2MA006",
+   "entite": "LIPL",
+   "poule": "R2M",
+   "date": "2026-10-10",
+   "heure": "21:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "VOLLEY CLUB FONTENAISIEN",
+   "adversaireClub": "0855490",
+   "score": [
+    "3",
+    "2"
+   ],
+   "sets": [
+    [
+     26,
+     24
+    ],
+    [
+     22,
+     25
+    ],
+    [
+     27,
+     25
+    ],
+    [
+     16,
+     25
+    ],
+    [
+     15,
+     13
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "REGIONALE 2 MASCULINE PAYS DE LA LOIRE",
+   "equipe": "Régionale Masculine"
+  },
+  {
+   "code": "DFAA012",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-10-10",
+   "heure": "18:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 1",
+   "adversaire": "VOLLEY CLUB FONTENAISIEN",
+   "adversaireClub": "0855490",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     16
+    ],
+    [
+     25,
+     17
+    ],
+    [
+     25,
+     16
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 1"
+  },
+  {
+   "code": "8M1A007",
+   "entite": "PTPL49",
+   "poule": "8M1",
+   "date": "2026-10-10",
+   "heure": "15:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "EPESSES HERBIERS VOLLEY-BALL",
+   "adversaireClub": "0857966",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     20,
+     25
+    ],
+    [
+     25,
+     11
+    ],
+    [
+     18,
+     25
+    ],
+    [
+     20,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "CHAMPIONNAT 18M 6x6",
+   "equipe": "M18 Masculine"
+  },
+  {
+   "code": "18AA006",
+   "entite": "PTPL85",
+   "poule": "18A",
+   "date": "2026-10-10",
+   "heure": "15:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "VOLLEY CLUB FONTENAISIEN",
+   "adversaireClub": "0855490",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     23,
+     25
+    ],
+    [
+     23,
+     25
+    ],
+    [
+     25,
+     21
+    ],
+    [
+     22,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "M18 FEMININE Poule A",
+   "equipe": "M18 Féminine"
+  },
+  {
+   "code": "150015",
+   "entite": "PTPL85",
+   "poule": "150",
+   "date": "2026-10-10",
+   "heure": "13:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "A.S.L. VENDEE VOLLEY-BALL",
+   "adversaireClub": "0856917",
+   "score": [
+    "3",
+    "1"
+   ],
+   "sets": [
+    [
+     25,
+     22
+    ],
+    [
+     20,
+     25
+    ],
+    [
+     25,
+     19
+    ],
+    [
+     25,
+     21
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "M15F 4x4",
+   "equipe": "M15 Féminine"
+  },
+  {
+   "code": "8M1A003",
+   "entite": "PTPL49",
+   "poule": "8M1",
+   "date": "2026-10-04",
+   "heure": "15:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "VOLLEY-BALL RIEZ VIE",
+   "adversaireClub": "0854984",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     17,
+     25
+    ],
+    [
+     23,
+     25
+    ],
+    [
+     19,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE DE LA VIE",
+   "competition": "CHAMPIONNAT 18M 6x6",
+   "equipe": "M18 Masculine"
+  },
+  {
+   "code": "DMAA010",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-10-04",
+   "heure": "14:00",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "CHALLANS VOLLEY-BALL",
+   "adversaireClub": "0858798",
+   "score": [
+    "3",
+    "P"
+   ],
+   "sets": [
+    [
+     25,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     25,
+     0
+    ]
+   ],
+   "forfait": true,
+   "salle": "SALLE MICHEL VRIGNAUD B",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "DFAA007",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-10-04",
+   "heure": "13:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "LA ROCHE/YON VOLLEY-BALL 3",
+   "adversaireClub": "0858891",
+   "score": [
+    "3",
+    "1"
+   ],
+   "sets": [
+    [
+     25,
+     17
+    ],
+    [
+     20,
+     25
+    ],
+    [
+     25,
+     20
+    ],
+    [
+     25,
+     19
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 2"
+  },
+  {
+   "code": "DMAA009",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-10-04",
+   "heure": "10:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "VENDRENNES VOLLEY-BALL",
+   "adversaireClub": "0858707",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     21
+    ],
+    [
+     25,
+     23
+    ],
+    [
+     25,
+     23
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 2"
+  },
+  {
+   "code": "R2MA005",
+   "entite": "LIPL",
+   "poule": "R2M",
+   "date": "2026-10-03",
+   "heure": "21:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "CS SABLONS GAZONFIER LE MANS",
+   "adversaireClub": "0724826",
+   "score": [
+    "2",
+    "3"
+   ],
+   "sets": [
+    [
+     25,
+     20
+    ],
+    [
+     21,
+     25
+    ],
+    [
+     26,
+     24
+    ],
+    [
+     21,
+     25
+    ],
+    [
+     9,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "REGIONALE 2 MASCULINE PAYS DE LA LOIRE",
+   "equipe": "Régionale Masculine"
+  },
+  {
+   "code": "DFAA006",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-10-03",
+   "heure": "18:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 1",
+   "adversaire": "CHALLANS VOLLEY-BALL",
+   "adversaireClub": "0858798",
+   "score": [
+    "2",
+    "3"
+   ],
+   "sets": [
+    [
+     25,
+     19
+    ],
+    [
+     25,
+     22
+    ],
+    [
+     32,
+     34
+    ],
+    [
+     21,
+     25
+    ],
+    [
+     11,
+     15
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 1"
+  },
+  {
+   "code": "150007",
+   "entite": "PTPL85",
+   "poule": "150",
+   "date": "2026-10-03",
+   "heure": "16:30",
+   "domicile": false,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "MAREUIL SPORTING CLUB",
+   "adversaireClub": "0857789",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     15,
+     25
+    ],
+    [
+     27,
+     25
+    ],
+    [
+     13,
+     25
+    ],
+    [
+     9,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "OMNISPORTS",
+   "competition": "M15F 4x4",
+   "equipe": "M15 Féminine"
+  },
+  {
+   "code": "DFAA003",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-09-26",
+   "heure": "18:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 1",
+   "adversaire": "LA ROCHE/YON VOLLEY-BALL 3",
+   "adversaireClub": "0858891",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     8
+    ],
+    [
+     25,
+     9
+    ],
+    [
+     25,
+     17
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 1"
+  },
+  {
+   "code": "150004",
+   "entite": "PTPL85",
+   "poule": "150",
+   "date": "2026-09-26",
+   "heure": "10:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL",
+   "adversaire": "EPESSES HERBIERS VOLLEY-BALL",
+   "adversaireClub": "0857966",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     19,
+     25
+    ],
+    [
+     15,
+     25
+    ],
+    [
+     22,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "M15F 4x4",
+   "equipe": "M15 Féminine"
+  },
+  {
+   "code": "DMAA003",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-09-20",
+   "heure": "16:00",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 3",
+   "adversaire": "LA ROCHE/YON VOLLEY-BALL 3",
+   "adversaireClub": "0858891",
+   "score": [
+    "0",
+    "3"
+   ],
+   "sets": [
+    [
+     12,
+     25
+    ],
+    [
+     11,
+     25
+    ],
+    [
+     13,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 3"
+  },
+  {
+   "code": "DFAA002",
+   "entite": "PTPL85",
+   "poule": "DFA",
+   "date": "2026-09-20",
+   "heure": "13:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "LES SABLES VOLLEY VENDEE 2",
+   "adversaireClub": "0854977",
+   "score": [
+    "1",
+    "3"
+   ],
+   "sets": [
+    [
+     25,
+     21
+    ],
+    [
+     10,
+     25
+    ],
+    [
+     15,
+     25
+    ],
+    [
+     18,
+     25
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE FÉMININE POULE A",
+   "equipe": "Départementale Féminine 2"
+  },
+  {
+   "code": "DMAA004",
+   "entite": "PTPL85",
+   "poule": "DMA",
+   "date": "2026-09-20",
+   "heure": "10:30",
+   "domicile": true,
+   "aizenay": "AIZENAY VOLLEY-BALL 2",
+   "adversaire": "CHALLANS VOLLEY-BALL",
+   "adversaireClub": "0858798",
+   "score": [
+    "3",
+    "0"
+   ],
+   "sets": [
+    [
+     25,
+     17
+    ],
+    [
+     25,
+     15
+    ],
+    [
+     25,
+     19
+    ]
+   ],
+   "forfait": false,
+   "salle": "SALLE OMEGA",
+   "competition": "DÉPARTEMENTALE MASCULINE",
+   "equipe": "Départementale Masculine 2"
+  }
+ ]
+}
