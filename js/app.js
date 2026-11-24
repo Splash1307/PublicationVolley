@@ -387,7 +387,7 @@ const MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.',
 const weekendOf=d=>{ const x=new Date(d+'T12:00'); const k=(x.getDay()+1)%7; x.setDate(x.getDate()-k); return x.toISOString().slice(0,10); }; // samedi de la semaine
 function wkLabel(sat){ const a=new Date(sat+'T12:00'), b=new Date(a); b.setDate(a.getDate()+1);
   return a.getMonth()===b.getMonth()?`Week-end du ${a.getDate()}-${b.getDate()} ${MOIS[a.getMonth()]}`:`Week-end du ${a.getDate()} ${MOIS[a.getMonth()]} au ${b.getDate()} ${MOIS[b.getMonth()]}`; }
-const cap=t=>String(t||'').toLowerCase().replace(/(^|[\s\-/'(])([a-zà-ÿ])/g,(m,p,c)=>p+c.toUpperCase()).replace(/\S*\d\S*/g,w=>w.toUpperCase()); // « M15F 4X4 » garde ses majuscules
+const cap=t=>String(t||'').toLowerCase().replace(/(^|[\s\-/'(])([a-zà-ÿ])/g,(m,p,c)=>p+c.toUpperCase()).replace(/\S*\d\S*/g,w=>/^\d+(er|e|ème)$/i.test(w)?w.toLowerCase():w.toUpperCase()); // « M15F 4X4 » garde ses majuscules, « 1er » reste en minuscules
 function findOpp(m){ const n=norm(m.adversaire).replace(/[^a-z0-9]/g,''), base=n.replace(/\d+$/,'');
   const key=o=>[o.name,...(o.aka||[])].map(x=>norm(x).replace(/[^a-z0-9]/g,''));
   return opps.find(o=>key(o).some(k=>k===n||k===base))
@@ -401,16 +401,16 @@ function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p 
   const ms=results.matchs||[];
   $('resMaj').textContent=results.maj?`Mis à jour le ${new Date(results.maj).toLocaleString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}`:'';
   if(!ms.length){ box.innerHTML=`<p class="small">${results.erreur?'Impossible de charger les résultats pour le moment.':'Aucun match terminé pour l\'instant.'}</p>`; $('resMore').hidden=true; return; }
-  // filtres : équipe, week-end
-  const teamOf=m=>m.equipe||cap(m.aizenay);
+  // filtres : équipe, week-end, championnat / coupe
+  const teamOf=m=>m.equipe||cap(m.aizenay), isCup=m=>/coupe/.test(norm(m.competition))||/^(18[0-9]|A1|B1|CM)/.test(m.poule);
   const fill=(id,vals,label)=>{ const sel=$(id), cur=sel.value; sel.innerHTML=sel.options[0].outerHTML+vals.map(v=>`<option value="${esc(v)}">${esc(label(v))}</option>`).join(''); sel.value=vals.includes(cur)?cur:''; };
   fill('fTeam',[...new Set(ms.map(teamOf))].sort((a,b)=>a.localeCompare(b,'fr')),v=>v);
   fill('fWeek',[...new Set(ms.map(m=>weekendOf(m.date)))],v=>wkLabel(v).replace('Week-end du ',''));
-  const fT=$('fTeam').value, fW=$('fWeek').value;
-  const list=ms.filter(m=>(!fT||teamOf(m)===fT)&&(!fW||weekendOf(m.date)===fW));
+  const fT=$('fTeam').value, fW=$('fWeek').value, fC=$('fComp').value;
+  const list=ms.filter(m=>(!fT||teamOf(m)===fT)&&(!fW||weekendOf(m.date)===fW)&&(!fC||(fC==='coupe')===isCup(m)));
   if(!list.length){ box.innerHTML='<p class="small empty">Aucun match ne correspond à ces filtres.</p>'; $('resMore').hidden=true; return; }
   const groups=[]; list.forEach(m=>{ const w=weekendOf(m.date); let g=groups.find(x=>x.w===w); if(!g) groups.push(g={w,list:[]}); g.list.push(m); });
-  const many=fT||fW?99:resShown; // avec un filtre, on montre tout ce qui correspond
+  const many=fT||fW||fC?99:resShown; // avec un filtre, on montre tout ce qui correspond
   const club=clubLogoData||DEFAULT_LOGO, fmtD=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
   box.innerHTML=groups.slice(0,many).map(g=>`<h3 class="wk">${wkLabel(g.w)}</h3>`+g.list.map(m=>{
     const [a,b]=m.score, win=m.forfait?a!=='F'&&a!=='P':+a>+b, lg=oppLogo(m);
@@ -446,7 +446,7 @@ $('resClose').addEventListener('click',()=>openResults(false));
 $('results').addEventListener('click',e=>{ if(e.target.id==='results') openResults(false); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('results').hidden) openResults(false); });
 $('resMore').addEventListener('click',()=>{ resShown+=2; drawResults(); });
-['fTeam','fWeek'].forEach(id=>$(id).addEventListener('change',drawResults));
+['fTeam','fWeek','fComp'].forEach(id=>$(id).addEventListener('change',drawResults));
 $('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(!b) return; const m=results.matchs.find(x=>x.code===b.dataset.code); if(m) applyResult(m); });
 
 // ---------- settings sheet ----------
