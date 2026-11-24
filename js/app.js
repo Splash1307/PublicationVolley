@@ -189,7 +189,7 @@ async function render(){
     const home=$('home').value==='1'; const d=frDate($('date').value).toUpperCase();
     infoLines(o,[d,frTime($('time').value).toUpperCase()+(home?' · DOMICILE':' · EXTÉRIEUR'),(home?$('venue').value:($('awayVenue').value||'')).toUpperCase()].filter(Boolean),46);
   }
-  drawTexts();
+  drawTexts(); drawSummary();
   try{ $('out').src=cv.toDataURL('image/jpeg',.93); }
   catch(e){ toast('Ouvre le studio via un serveur web (voir README), pas en double-cliquant le fichier.'); }
 }
@@ -259,6 +259,18 @@ const fname=()=>`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().na
 $('dl').addEventListener('click',()=>{ if(!exporting&&(adjusting||activeText)){ exporting=true; render().then(()=>{ $('dl').click(); }); return; } if(scoreBlocked()){ exporting=false; render(); toast('Corrige le score avant de télécharger'); setGrid.scrollIntoView({behavior:'smooth',block:'center'}); return; } if(!downloads){ cv.toBlob(blob=>{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); },'image/jpeg',.93); afterExport(); return; } cv.toBlob(async blob=>{ try{ await downloads.save({filename:`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`,data:blob}); toast('Image enregistrée'); }catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } $('dl').hidden=true; toast('Téléchargement indisponible ici : appui long sur l\'image'); } },'image/jpeg',.93); afterExport(); });
 function afterExport(){ if(exporting){ exporting=false; render(); } }
 
+// ---------- résumé du match (bloc replié) ----------
+// Équipe, adversaire, date et score tiennent sur une ligne ; « Modifier » déplie le détail.
+function drawSummary(){ const o=curOpp(), sets=parseSets($('sets').value); let a=0,b=0; sets.forEach(([x,y])=>x>y?a++:b++);
+  $('msTeam').textContent=curTeam().name||'Équipe';
+  const d=$('date').value?new Date($('date').value+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'';
+  $('msLine').textContent=[o.name?'contre '+o.name:'Adversaire à choisir',d].filter(Boolean).join(' · ');
+  $('msLogo').innerHTML=o.logo?`<img src="${o.logo}" alt="">`:'<span>?</span>';
+  $('msScore').textContent=sets.length?`${a} - ${b}`:'';
+  $('msScore').className='msscore'+(sets.length?(a>b?' w':' l'):''); }
+function openMatch(v){ $('mbody').hidden=!v; $('msumBtn').setAttribute('aria-expanded',v); $('msEdit').textContent=v?'Fermer':'Modifier'; $('mdet').classList.toggle('open',v); }
+$('msumBtn').addEventListener('click',()=>openMatch($('mbody').hidden));
+
 // ---------- score grid ----------
 // One row per set (Griffons | adversaire). Sets 4 and 5 only appear while the match is undecided.
 // The grid writes "25-20, 23-25, …" into the hidden #sets field that render() reads.
@@ -285,7 +297,7 @@ function syncSets(){
   }
   setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=shown);
   $('sets').value=done.join(', '); $('setsErr').textContent=errs.join('\n');
-  const blocked=errs.length>0; $('dl').setAttribute('aria-disabled',blocked); document.querySelector('.frame').classList.toggle('blocked',blocked); render();
+  const blocked=errs.length>0; if(blocked) openMatch(true); $('dl').setAttribute('aria-disabled',blocked); document.querySelector('.frame').classList.toggle('blocked',blocked); render();
 }
 setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) return; t.value=t.value.replace(/\D/g,'').slice(0,2); syncSets();
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });

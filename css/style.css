@@ -221,3 +221,25 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .rfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--mute);border-top:1px dashed var(--line);padding-top:8px}
 .wk{display:flex;align-items:center;gap:10px}
 .wk::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* bloc « match » replié */
+.mdet{border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.mdet.open{border-color:var(--sky)}
+.msum{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 12px;border:0;background:transparent;text-align:left;font-weight:400}
+.mslogo{width:42px;height:42px;flex:none;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:#5a6774;font-weight:600}
+.mslogo img{width:100%;height:100%;object-fit:contain;padding:3px}
+.mstext{flex:1;min-width:0;display:flex;flex-direction:column}
+.mstext b{font:700 17px/1.2 'Barlow Condensed',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mstext small{font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msscore{flex:none;font:400 24px/1 Anton,Impact,sans-serif;padding:5px 9px;border-radius:8px}
+.msscore:empty{display:none}
+.msscore.w{background:#2e9e5b;color:#fff}.msscore.l{background:#d64545;color:#fff}
+.msedit{flex:none;font-size:13px;font-weight:600;color:var(--sky);text-decoration:underline}
+.mbody{padding:4px 12px 14px;border-top:1px dashed var(--line)}
+@media(max-width:480px){
+  .msum{gap:10px;padding:10px}
+  .mstext b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .msedit{font-size:0;text-decoration:none;width:28px;text-align:center}
+  .msedit::after{content:"✎";font-size:22px;line-height:1}
+  .mdet.open .msedit::after{content:"✕";font-size:18px}
+}
