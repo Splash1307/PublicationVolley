@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Résultats FFVB : toutes les heures le week-end (jours de match), 3 fois par jour en semaine.
+  schedule:
+    - cron: '23 7-23 * * 6,0'
+    - cron: '23 6,12,18 * * 1-5'
 
 permissions:
   contents: read
@@ -21,6 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        id: pages
+      - name: Résultats FFVB (data/resultats.json)
+        run: node scripts/resultats.mjs
+        env:
+          PAGES_URL: ${{ steps.pages.outputs.base_url }}/
       - name: Version des fichiers (évite les vieux fichiers en cache)
         run: sed -i "s/?v=dev/?v=${GITHUB_SHA::8}/g" index.html
       - uses: actions/upload-pages-artifact@v3

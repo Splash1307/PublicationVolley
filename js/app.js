@@ -5,37 +5,37 @@ const $=id=>document.getElementById(id);
 const W=1080;
 const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=9;
+const SEED=10;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
 // Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
 let opps=[
-  {name:"A.S.L. Vendée Volley-Ball",logo:"assets/logos/asl-volley.webp",aka:["ASL Volley"]},
-  {name:"Aizenay Volley-Ball (Les Griffons)",logo:"assets/logos/griffons.webp"},
+  {name:"A.S.L. Vendée Volley-Ball",ffvb:"0856917",logo:"assets/logos/asl-volley.webp",aka:["ASL Volley"]},
+  {name:"Aizenay Volley-Ball (Les Griffons)",ffvb:"0856001",logo:"assets/logos/griffons.webp"},
   {name:"AS Bruffière Defontaine",logo:"assets/logos/asbd-volley-ball.webp"},
-  {name:"AS Saint-Barthélemy d'Anjou VB",logo:"assets/logos/st-barthelemy-volley.webp"},
-  {name:"Challans Volley-Ball",logo:"assets/logos/challans-volley-ball-cvb.webp",aka:["Challans Volley-Ball (CVB)"]},
-  {name:"CS Sablons Gazonfier Le Mans",logo:"assets/logos/cssg-le-mans-volley.webp",aka:["CSSG Le Mans Volley"]},
-  {name:"Épesses Herbiers Volley-Ball",logo:"assets/logos/epesses-herbiers-vb-ehvb.webp",aka:["Épesses Herbiers VB (EHVB)"]},
-  {name:"Éveil Sportif Florentin Volley-Ball",logo:"assets/logos/es-florentin-volley-ball.webp",aka:["ES Florentin Volley-Ball"]},
-  {name:"Jeunesse Sport Coulaines",logo:"assets/logos/jeunesse-sport-coulaines.webp"},
-  {name:"La Baule Volley-Ball",logo:"assets/logos/la-baule-volley-ball.webp"},
-  {name:"La Roche-sur-Yon Volley-Ball",logo:"assets/logos/la-roche-volley-ball-lrvb.webp",aka:["La Roche Volley-Ball (LRVB)"]},
+  {name:"AS Saint-Barthélemy d'Anjou VB",ffvb:"0495345",logo:"assets/logos/st-barthelemy-volley.webp"},
+  {name:"Challans Volley-Ball",ffvb:"0858798",logo:"assets/logos/challans-volley-ball-cvb.webp",aka:["Challans Volley-Ball (CVB)"]},
+  {name:"CS Sablons Gazonfier Le Mans",ffvb:"0724826",logo:"assets/logos/cssg-le-mans-volley.webp",aka:["CSSG Le Mans Volley"]},
+  {name:"Épesses Herbiers Volley-Ball",ffvb:"0857966",logo:"assets/logos/epesses-herbiers-vb-ehvb.webp",aka:["Épesses Herbiers VB (EHVB)"]},
+  {name:"Éveil Sportif Florentin Volley-Ball",ffvb:"0858359",logo:"assets/logos/es-florentin-volley-ball.webp",aka:["ES Florentin Volley-Ball"]},
+  {name:"Jeunesse Sport Coulaines",ffvb:"0724695",logo:"assets/logos/jeunesse-sport-coulaines.webp"},
+  {name:"La Baule Volley-Ball",ffvb:"0443000",logo:"assets/logos/la-baule-volley-ball.webp"},
+  {name:"La Roche-sur-Yon Volley-Ball",ffvb:"0858891",logo:"assets/logos/la-roche-volley-ball-lrvb.webp",aka:["La Roche Volley-Ball (LRVB)"]},
   {name:"Les Herbiers",logo:"assets/logos/epesses-herbiers-vb-ehvb.webp"},
-  {name:"Les Neptunes Nantes Volley Association",logo:"assets/logos/neptunes-de-nantes.webp"},
-  {name:"Les Sables Volley Vendée",logo:"assets/logos/les-sables-volley-vendee-lsvv.webp",aka:["Les Sables Volley Vendée (LSVV)"]},
-  {name:"Mareuil Sporting Club",logo:"assets/logos/mareuil-sporting-club.webp"},
-  {name:"Montaigu-Vendée Bouffère Volley-Ball",logo:"assets/logos/montaigu-vendee-bouffere-vb.webp",aka:["Montaigu Vendée Bouffère VB"]},
-  {name:"Oya Volley-Ball",logo:"assets/logos/oya-volley-ball-ile-d-yeu.webp",aka:["Oya Volley-Ball (Île d'Yeu)"]},
+  {name:"Les Neptunes Nantes Volley Association",ffvb:"0444976",logo:"assets/logos/neptunes-de-nantes.webp"},
+  {name:"Les Sables Volley Vendée",ffvb:"0854977",logo:"assets/logos/les-sables-volley-vendee-lsvv.webp",aka:["Les Sables Volley Vendée (LSVV)"]},
+  {name:"Mareuil Sporting Club",ffvb:"0857789",logo:"assets/logos/mareuil-sporting-club.webp"},
+  {name:"Montaigu-Vendée Bouffère Volley-Ball",ffvb:"0857865",logo:"assets/logos/montaigu-vendee-bouffere-vb.webp",aka:["Montaigu Vendée Bouffère VB"]},
+  {name:"Oya Volley-Ball",ffvb:"0859365",logo:"assets/logos/oya-volley-ball-ile-d-yeu.webp",aka:["Oya Volley-Ball (Île d'Yeu)"]},
   {name:"Réveil Sportif Volley-Ball Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
-  {name:"SMSA / Tiffauges",logo:"assets/logos/entente-smsa-tiffauges.webp"},
-  {name:"Sporting Club de l'Ouest",logo:"assets/logos/sco-angers-volley.webp"},
+  {name:"SMSA / Tiffauges",ffvb:"0858913",logo:"assets/logos/entente-smsa-tiffauges.webp"},
+  {name:"Sporting Club de l'Ouest",ffvb:"0491492",logo:"assets/logos/sco-angers-volley.webp"},
   {name:"St Martin / St Aubin Volley",logo:"assets/logos/smsa-volley-ball.webp"},
-  {name:"Vendrennes Volley-Ball",logo:"assets/logos/volley-vendrennes-vvb.webp",aka:["Volley Vendrennes (VVB)"]},
-  {name:"Volley-Ball Riez Vie",logo:"assets/logos/volley-ball-riez-vie-vbrv.webp",aka:["Volley Ball Riez Vie (VBRV)"]},
-  {name:"Volley Club Clisson",logo:"assets/logos/volley-club-clisson.webp"},
-  {name:"Volley Club Fontenaisien",logo:"assets/logos/vb-club-fontenaisien.webp",aka:["VB Club Fontenaisien"]},
-  {name:"Volley Sud Vendée",logo:"assets/logos/volley-sud-vendee-lucon.webp",aka:["Volley Sud Vendée (Luçon)"]}
+  {name:"Vendrennes Volley-Ball",ffvb:"0858707",logo:"assets/logos/volley-vendrennes-vvb.webp",aka:["Volley Vendrennes (VVB)"]},
+  {name:"Volley-Ball Riez Vie",ffvb:"0854984",logo:"assets/logos/volley-ball-riez-vie-vbrv.webp",aka:["Volley Ball Riez Vie (VBRV)"]},
+  {name:"Volley Club Clisson",ffvb:"0442445",logo:"assets/logos/volley-club-clisson.webp"},
+  {name:"Volley Club Fontenaisien",ffvb:"0855490",logo:"assets/logos/vb-club-fontenaisien.webp",aka:["VB Club Fontenaisien"]},
+  {name:"Volley Sud Vendée",ffvb:"0859366",logo:"assets/logos/volley-sud-vendee-lucon.webp",aka:["Volley Sud Vendée (Luçon)"]}
 ].map(o=>({id:uid(),...o}));
 const SETTINGS=['venue'];
 const teamPhotos={}; // id -> dataURL (kept in IndexedDB)
@@ -50,7 +50,7 @@ function restore(){ try{
   if(Array.isArray(o.teams)){ const t=o.teams.map(x=>typeof x==='string'?{id:uid(),name:x}:x); const add=old?teams.filter(d=>!t.some(x=>low(x.name)===low(d.name))):[]; teams=t.concat(add); }
   if(Array.isArray(o.opps)){ const t=o.opps.map(x=>x.id?x:{id:uid(),...x}); if(legacy&&o.oppSel!=null&&t[+o.oppSel]) o.oppId=t[+o.oppSel].id; let add=[];
     if(old){ add=opps.filter(d=>{ const m=t.find(x=>low(x.name)===low(d.name)||(d.aka||[]).some(a=>low(a)===low(x.name)));
-      if(!m) return true; m.name=d.name; if(d.logo&&(!m.logo||m.logo.startsWith('assets/'))) m.logo=d.logo; return false; }); }
+      if(!m) return true; m.name=d.name; if(d.ffvb) m.ffvb=d.ffvb; if(d.logo&&(!m.logo||m.logo.startsWith('assets/'))) m.logo=d.logo; return false; }); }
     const REMOVED=['rsvb / smsa']; if(old) t.splice(0,t.length,...t.filter(x=>!REMOVED.includes(low(x.name))));
     opps=t.concat(add); }
   if(legacy&&o.team){ const m=teams.find(x=>x.name===o.team); o.team=m&&m.id; }
@@ -180,7 +180,7 @@ async function render(){
     plate(o,()=>clubLogo&&contain(clubLogo,229,1053,150,150),()=>{ ctx.fillStyle=C.navy; ctx.textAlign='center'; ctx.font='150px Anton'; ctx.fillText(`${a} - ${b}`,540,1108); },oppMark);
     const parts=sets.map(([x,y])=>`${x}:${y}`); const lines=[]; for(let i=0;i<parts.length;i+=2) lines.push(parts.slice(i,i+2).join(', ')+(i+2<parts.length?',':''));
     infoLines(o,lines.slice(0,3),56);
-    $('setsInfo').textContent=sets.length?`Match : ${a} - ${b}${a===3?' · victoire des Griffons':b===3?' · défaite':''}`:'Tape les points de chaque set.';
+    $('setsInfo').textContent=sets.length?`Match : ${a} - ${b}${a===WIN()?' · victoire des Griffons':b===WIN()?' · défaite':''}`:'Tape les points de chaque set.';
   } else {
     grunge(dmy($('date').value),W-22,top+64,56,'right',360);
     grunge('JOUR DE MATCH',W/2,top+192,128,'center',880);
@@ -266,18 +266,19 @@ const setGrid=$('setGrid');
 for(let i=0;i<5;i++) setGrid.insertAdjacentHTML('beforeend',`<span class="sn" data-row="${i}">Set ${i+1}</span>`+[0,1].map(side=>`<input data-row="${i}" data-side="${side}" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="–" autocomplete="off" aria-label="Set ${i+1}, ${side?'adversaire':'Griffons'}">`).join(''));
 const cell=(i,side)=>setGrid.querySelector(`input[data-row="${i}"][data-side="${side}"]`);
 // Volley rules: sets 1-4 to 25, set 5 to 15, always with 2 points clear (no cap: 26-24, 31-29…).
-function setError(n,x,y){ const t=n===5?15:25, w=Math.max(x,y), l=Math.min(x,y);
+let bestOf=5; const WIN=()=>bestOf===3?2:3; // matchs en 3 sets gagnants (championnat) ou 2 (coupes)
+function setError(n,x,y){ const t=n===bestOf?15:25, w=Math.max(x,y), l=Math.min(x,y);
   if(w<t) return `Set ${n} : le gagnant doit atteindre ${t} points.`;
   if(l<=t-2&&w!==t) return `Set ${n} : ${x}-${y} impossible, le set s'arrête à ${t}-${l}.`;
   if(l>t-2&&w!==l+2) return `Set ${n} : ${x}-${y} impossible, il faut 2 points d'écart (ex. ${l+2}-${l}).`;
   return ''; }
 const scoreBlocked=()=>$('setsErr').textContent!=='';
 function syncSets(){
-  const done=[], errs=[]; let a=0,b=0, shown=3;
+  const done=[], errs=[]; let a=0,b=0, shown=WIN();
   for(let i=0;i<5;i++){
     const xs=cell(i,0).value, ys=cell(i,1).value, x=+xs, y=+ys;
     const both=xs!==''&&ys!=='', tie=both&&x===y, full=both&&!tie, err=i<shown&&both?(tie?`Set ${i+1} : égalité impossible.`:setError(i+1,x,y)):'';
-    if(i<shown&&full){ done.push(`${x}-${y}`); x>y?a++:b++; if(i===shown-1&&a<3&&b<3&&shown<5) shown++; }
+    if(i<shown&&full){ done.push(`${x}-${y}`); x>y?a++:b++; if(i===shown-1&&a<WIN()&&b<WIN()&&shown<bestOf) shown++; }
     if(err) errs.push(err);
     cell(i,0).classList.toggle('win',full&&!err&&x>y); cell(i,1).classList.toggle('win',full&&!err&&y>x);
     [0,1].forEach(sd=>cell(i,sd).classList.toggle('bad',!!err));
@@ -289,6 +290,8 @@ function syncSets(){
 setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) return; t.value=t.value.replace(/\D/g,'').slice(0,2); syncSets();
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });
 setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=3);
+document.querySelectorAll('[data-bo]').forEach(b=>b.addEventListener('click',()=>setBestOf(+b.dataset.bo)));
+function setBestOf(n){ bestOf=n; document.querySelectorAll('[data-bo]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.bo===n)); syncSets(); }
 
 // ---------- photo framing & moving texts ----------
 // "Ajuster la photo": drag to move it, pinch or wheel to zoom. An open text (activeText) can be dragged
@@ -376,6 +379,57 @@ $('textList').addEventListener('click',e=>{ const b=e.target.closest('button[dat
   if(b.dataset.tx==='color'){ t.color=b.dataset.c; card.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b)); card.querySelector('.dot').style.setProperty('--c',t.color); }
   if(b.dataset.tx==='style'){ t.style=b.dataset.s; card.querySelectorAll('[data-tx=style]').forEach(c=>c.setAttribute('aria-pressed',c===b)); }
   render(); });
+
+// ---------- résultats FFVB ----------
+// data/resultats.json est produit par scripts/resultats.mjs (GitHub Actions) à partir du site de la FFVB.
+let results=null, resShown=2;
+const MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const weekendOf=d=>{ const x=new Date(d+'T12:00'); const k=(x.getDay()+1)%7; x.setDate(x.getDate()-k); return x.toISOString().slice(0,10); }; // samedi de la semaine
+function wkLabel(sat){ const a=new Date(sat+'T12:00'), b=new Date(a); b.setDate(a.getDate()+1);
+  return a.getMonth()===b.getMonth()?`Week-end du ${a.getDate()}-${b.getDate()} ${MOIS[a.getMonth()]}`:`Week-end du ${a.getDate()} ${MOIS[a.getMonth()]} au ${b.getDate()} ${MOIS[b.getMonth()]}`; }
+const cap=t=>String(t||'').toLowerCase().replace(/(^|[\s\-/'(])([a-zà-ÿ])/g,(m,p,c)=>p+c.toUpperCase()).replace(/\S*\d\S*/g,w=>w.toUpperCase()); // « M15F 4X4 » garde ses majuscules
+function findOpp(m){ const n=norm(m.adversaire).replace(/[^a-z0-9]/g,''), base=n.replace(/\d+$/,'');
+  const key=o=>[o.name,...(o.aka||[])].map(x=>norm(x).replace(/[^a-z0-9]/g,''));
+  return opps.find(o=>key(o).some(k=>k===n||k===base))
+    || (!m.adversaire.includes(' / ')&&m.adversaireClub&&opps.find(o=>o.ffvb===m.adversaireClub)) || null; } // une entente partage le n° d'un club : pas par n°
+function oppLogo(m){ const o=findOpp(m); return o&&o.logo; }
+async function loadResults(){
+  try{ const r=await fetch('data/resultats.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw 0; results=await r.json(); }
+  catch(e){ results=results||{matchs:[],maj:null,erreur:true}; }
+  drawResults(); }
+function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p class="small">Chargement…</p>'; return; }
+  const ms=results.matchs||[];
+  $('resMaj').textContent=results.maj?`Mis à jour le ${new Date(results.maj).toLocaleString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}`:'';
+  if(!ms.length){ box.innerHTML=`<p class="small">${results.erreur?'Impossible de charger les résultats pour le moment.':'Aucun match terminé pour l\'instant.'}</p>`; $('resMore').hidden=true; return; }
+  const groups=[]; ms.forEach(m=>{ const w=weekendOf(m.date); let g=groups.find(x=>x.w===w); if(!g) groups.push(g={w,list:[]}); g.list.push(m); });
+  box.innerHTML=groups.slice(0,resShown).map(g=>`<h3 class="wk">${wkLabel(g.w)}</h3>`+g.list.map(m=>{ const [a,b]=m.score, win=m.forfait?a!=='F'&&a!=='P':+a>+b, lg=oppLogo(m);
+    return `<button type="button" class="res" data-code="${esc(m.code)}">
+      <span class="rteam"><b>${esc(m.equipe||cap(m.aizenay))}</b><small>${esc(cap(m.competition))} · ${new Date(m.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</small></span>
+      <span class="rscore ${win?'w':'l'}">${esc(a)} - ${esc(b)}</span>
+      <span class="ropp">${lg?`<img src="${lg}" alt="">`:'<span class="nologo">?</span>'}<span>${m.domicile?'contre':'chez'} ${esc(cap(m.adversaire))}</span></span>
+    </button>`; }).join('')).join('');
+  $('resMore').hidden=groups.length<=resShown; }
+function applyResult(m){
+  kind='result'; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.kind==='result'));
+  const t=m.equipe&&teams.find(x=>norm(x.name)===norm(m.equipe));
+  if(t) $('team').value=t.id;
+  const o=findOpp(m); if(o){ oppId=o.id; } else { oppId='__free'; $('opp').value=cap(m.adversaire); }
+  $('date').value=m.date;
+  const nums=m.score.map(Number).filter(Number.isFinite); setBestOf(nums.length&&Math.max(...nums)===2?3:5);
+  for(let i=0;i<5;i++){ const st=m.sets[i]; cell(i,0).value=st?st[0]:''; cell(i,1).value=st?st[1]:''; }
+  drawBtn(); drawPicker(); sync(); store(); syncSets(); loadOpp().then(render);
+  openResults(false);
+  toast(t?`${t.name} · match importé`:'Match importé : choisis l\'équipe');
+  if(!t) $('team').focus(); }
+let resReturn=null;
+function openResults(v){ $('results').hidden=!v; document.body.classList.toggle('noscroll',v);
+  if(v){ resReturn=document.activeElement; $('resClose').focus(); if(!results) drawResults(); loadResults(); } else if(resReturn&&resReturn.isConnected) resReturn.focus(); }
+$('resOpen').addEventListener('click',()=>openResults(true));
+$('resClose').addEventListener('click',()=>openResults(false));
+$('results').addEventListener('click',e=>{ if(e.target.id==='results') openResults(false); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('results').hidden) openResults(false); });
+$('resMore').addEventListener('click',()=>{ resShown+=2; drawResults(); });
+$('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(!b) return; const m=results.matchs.find(x=>x.code===b.dataset.code); if(m) applyResult(m); });
 
 // ---------- settings sheet ----------
 let setReturn=null;
