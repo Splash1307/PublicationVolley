@@ -244,3 +244,7 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
   .mdet.open .msedit::after{content:"✕";font-size:18px}
 }
 .newpub{width:44px;height:44px;min-height:0;padding:0;border-radius:50%;font:400 30px/1 Barlow,sans-serif;background:var(--yel);border-color:var(--yel);color:#112f49;display:grid;place-items:center}
+/* « Modifier » retiré : toucher la ligne suffit à déplier / replier */
+.msedit,.msedit::after{display:none!important}
+.msum{cursor:pointer}
+@media(hover:hover){.msum:hover .mstext b{text-decoration:underline}}
