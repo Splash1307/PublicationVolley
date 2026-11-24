@@ -233,7 +233,6 @@ $('newAdd').addEventListener('click',async()=>{ const name=$('newName').value.tr
 $('newName').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('newAdd').click(); } });
 
 $('logo').addEventListener('change',async e=>{ const f=e.target.files[0]; if(!f) return; clubLogoData=await shrink(f,360); store(); await loadClubLogo(); render(); });
-$('logoReset').addEventListener('click',async()=>{ clubLogoData=null; $('logo').value=''; store(); await loadClubLogo(); render(); });
 
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),2200); }
 const slug=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
