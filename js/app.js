@@ -401,14 +401,23 @@ function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p 
   const ms=results.matchs||[];
   $('resMaj').textContent=results.maj?`Mis à jour le ${new Date(results.maj).toLocaleString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}`:'';
   if(!ms.length){ box.innerHTML=`<p class="small">${results.erreur?'Impossible de charger les résultats pour le moment.':'Aucun match terminé pour l\'instant.'}</p>`; $('resMore').hidden=true; return; }
-  const groups=[]; ms.forEach(m=>{ const w=weekendOf(m.date); let g=groups.find(x=>x.w===w); if(!g) groups.push(g={w,list:[]}); g.list.push(m); });
-  box.innerHTML=groups.slice(0,resShown).map(g=>`<h3 class="wk">${wkLabel(g.w)}</h3>`+g.list.map(m=>{ const [a,b]=m.score, win=m.forfait?a!=='F'&&a!=='P':+a>+b, lg=oppLogo(m);
+  // filtres : équipe, week-end, victoire / défaite
+  const teamOf=m=>m.equipe||cap(m.aizenay), isWin=m=>m.forfait?m.score[0]!=='F'&&m.score[0]!=='P':+m.score[0]>+m.score[1];
+  const fill=(id,vals,label)=>{ const sel=$(id), cur=sel.value; sel.innerHTML=sel.options[0].outerHTML+vals.map(v=>`<option value="${esc(v)}">${esc(label(v))}</option>`).join(''); sel.value=vals.includes(cur)?cur:''; };
+  fill('fTeam',[...new Set(ms.map(teamOf))].sort((a,b)=>a.localeCompare(b,'fr')),v=>v);
+  fill('fWeek',[...new Set(ms.map(m=>weekendOf(m.date)))],v=>wkLabel(v).replace('Week-end du ',''));
+  const fT=$('fTeam').value, fW=$('fWeek').value, fR=$('fRes').value;
+  const list=ms.filter(m=>(!fT||teamOf(m)===fT)&&(!fW||weekendOf(m.date)===fW)&&(!fR||(fR==='w')===isWin(m)));
+  if(!list.length){ box.innerHTML='<p class="small empty">Aucun match ne correspond à ces filtres.</p>'; $('resMore').hidden=true; return; }
+  const groups=[]; list.forEach(m=>{ const w=weekendOf(m.date); let g=groups.find(x=>x.w===w); if(!g) groups.push(g={w,list:[]}); g.list.push(m); });
+  const many=fT||fW||fR?99:resShown; // avec un filtre, on montre tout ce qui correspond
+  box.innerHTML=groups.slice(0,many).map(g=>`<h3 class="wk">${wkLabel(g.w)}</h3>`+g.list.map(m=>{ const [a,b]=m.score, win=m.forfait?a!=='F'&&a!=='P':+a>+b, lg=oppLogo(m);
     return `<button type="button" class="res" data-code="${esc(m.code)}">
       <span class="rteam"><b>${esc(m.equipe||cap(m.aizenay))}</b><small>${esc(cap(m.competition))} · ${new Date(m.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</small></span>
       <span class="rscore ${win?'w':'l'}">${esc(a)} - ${esc(b)}</span>
       <span class="ropp">${lg?`<img src="${lg}" alt="">`:'<span class="nologo">?</span>'}<span>${m.domicile?'contre':'chez'} ${esc(cap(m.adversaire))}</span></span>
     </button>`; }).join('')).join('');
-  $('resMore').hidden=groups.length<=resShown; }
+  $('resMore').hidden=groups.length<=many; }
 function applyResult(m){
   kind='result'; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.kind==='result'));
   const t=m.equipe&&teams.find(x=>norm(x.name)===norm(m.equipe));
@@ -429,6 +438,7 @@ $('resClose').addEventListener('click',()=>openResults(false));
 $('results').addEventListener('click',e=>{ if(e.target.id==='results') openResults(false); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('results').hidden) openResults(false); });
 $('resMore').addEventListener('click',()=>{ resShown+=2; drawResults(); });
+['fTeam','fWeek','fRes'].forEach(id=>$(id).addEventListener('change',drawResults));
 $('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(!b) return; const m=results.matchs.find(x=>x.code===b.dataset.code); if(m) applyResult(m); });
 
 // ---------- settings sheet ----------
