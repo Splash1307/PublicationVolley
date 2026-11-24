@@ -458,6 +458,16 @@ $('resClose').addEventListener('click',()=>openResults(false));
 $('results').addEventListener('click',e=>{ if(e.target.id==='results') openResults(false); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('results').hidden) openResults(false); });
 $('resMore').addEventListener('click',()=>{ resShown+=1; drawResults(); });
+// « + » : publication vierge (pas d'adversaire, pas de score, pas de photo ni de texte, date du jour)
+function newBlank(){
+  kind='result'; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.kind==='result'));
+  matchPhoto=null; $('photo').value=''; oppId=null; $('opp').value='';
+  $('date').value=new Date().toISOString().slice(0,10);
+  for(let i=0;i<5;i++){ cell(i,0).value=''; cell(i,1).value=''; }
+  texts=[]; activeText=null; adjusting=false; drawTextList();
+  drawBtn(); drawPicker(); sync(); store(); setBestOf(5); openMatch(true); loadOpp().then(render);
+  openResults(false); toast('Nouvelle publication : remplis le match'); }
+$('newBlank').addEventListener('click',newBlank);
 ['fTeam','fWeek','fComp'].forEach(id=>$(id).addEventListener('change',drawResults));
 $('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(!b) return; const m=results.matchs.find(x=>x.code===b.dataset.code); if(m) applyResult(m); });
 
@@ -476,6 +486,7 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()
 $('lockNow').addEventListener('click',()=>{ try{ localStorage.removeItem('griffonsUnlock'); }catch(e){} location.reload(); });
 
 const saved=restore(); fillTeams(saved&&saved.team); oppId=(saved&&saved.oppId)||null; if(oppId!=='__free'&&!opps.some(o=>o.id===oppId)) oppId=(sortedOpps()[0]||{}).id||null; drawPicker(); drawTeams(); drawClubs(); sync();
+openResults(true); // l'appli s'ouvre sur la page Matchs
 (async()=>{ Object.assign(teamPhotos,await idb.all()); drawTeams(); await loadClubLogo(); await loadOpp(); render();
   try{ await Promise.all([document.fonts.load('100px Anton'),document.fonts.load("600 40px 'Barlow Condensed'")]); }catch(e){} render(); })();
 }
