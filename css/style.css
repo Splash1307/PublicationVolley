@@ -135,3 +135,13 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .tabs{display:flex}
 .tabs button{flex:1 1 auto;white-space:nowrap}
 .top h1{flex:1 1 0}
+
+/* ajuster la photo */
+.frame.adjusting{outline:3px solid var(--sky);outline-offset:3px}
+.frame.adjusting img{touch-action:none;cursor:grab;-webkit-touch-callout:none;user-select:none}
+.frame.adjusting img:active{cursor:grabbing}
+.adjbar{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.adjbar p{margin:0 0 10px;font-size:14px;color:var(--mute)}
+.zoom{display:flex;align-items:center;gap:12px}
+.zoom input{flex:1;margin:0;padding:0;min-height:44px;background:transparent;border:0;accent-color:var(--navy)}
+.adjbar .row{justify-content:flex-end;margin-top:8px}

@@ -98,7 +98,12 @@ function contain(im,cx,cy,bw,bh){ const r=Math.min(bw/im.width,bh/im.height); ct
 
 // ---------- poster ----------
 function backdrop(){
-  if(photo){ const r=Math.max(W/photo.width,H/photo.height); const w=photo.width*r,h=photo.height*r; ctx.drawImage(photo,(W-w)/2,Math.min(0,(H-h)*.35),w,h); }
+  if(photo){ if(photo!==adjPhoto){ adj={z:1,dx:0,dy:0}; adjPhoto=photo; $('adjZoom').value=1; }
+    const r=Math.max(W/photo.width,H/photo.height)*adj.z, w=photo.width*r, h=photo.height*r;
+    const bx=(W-w)/2, by=Math.min(0,(H-h)*.35);
+    // the photo always covers the whole visual: clamp the offset, then keep the clamped value
+    const x=Math.min(0,Math.max(W-w,bx+adj.dx)), y=Math.min(0,Math.max(H-h,by+adj.dy)); adj.dx=x-bx; adj.dy=y-by;
+    ctx.drawImage(photo,x,y,w,h); }
   else { const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2c6f93'); g.addColorStop(1,'#123049'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     ctx.save(); ctx.globalAlpha=.08; ctx.strokeStyle='#fff'; ctx.lineWidth=3; for(let i=-H;i<W;i+=60){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+H*.5,H); ctx.stroke(); } ctx.restore();
     ctx.fillStyle='rgba(255,255,255,.55)'; ctx.font="600 34px 'Barlow Condensed'"; ctx.textAlign='center'; ctx.fillText('Ajoute la photo de l\'équipe',W/2,H*.42); }
@@ -152,9 +157,9 @@ function oppMark(){
 function infoLines(o,lines,size){ ctx.save(); ctx.translate(0,o); ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.shadowColor='rgba(0,0,0,.3)'; ctx.shadowBlur=6;
   lines.forEach((t,i)=>{ const s=fit(ctx,t,390,size,'Anton'); ctx.font=`${s}px Anton`; ctx.fillText(t,672,1194+i*(size+4)); }); ctx.restore(); }
 
-let photo=null;
+let photo=null, adj={z:1,dx:0,dy:0}, adjPhoto=null;
 async function render(){
-  photo=await currentPhoto(); photoInfo();
+  photo=await currentPhoto(); photoInfo(); $('adjBtn').hidden=!photo||adjusting; if(!photo&&adjusting) setAdjust(false);
   cv.width=W; cv.height=H; const o=H-1350, top=H===1920?150:0;
   backdrop(); waves(o);
   const title=comp().toUpperCase();
@@ -272,6 +277,28 @@ function syncSets(){
 setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) return; t.value=t.value.replace(/\D/g,'').slice(0,2); syncSets();
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });
 setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=3);
+
+// ---------- photo framing ----------
+// "Ajuster la photo": drag to move, pinch / slider / wheel to zoom. Offsets are in canvas pixels.
+let adjusting=false, adjRaf=0;
+const frame=document.querySelector('.frame'), outImg=$('out');
+const reRender=()=>{ if(!adjRaf) adjRaf=requestAnimationFrame(()=>{ adjRaf=0; render(); }); };
+function setAdjust(v){ adjusting=v; frame.classList.toggle('adjusting',v); $('adjBar').hidden=!v; $('adjBtn').hidden=v||!photo; if(!v) ptrs.clear(); }
+function zoomTo(z){ const old=adj.z; adj.z=Math.min(4,Math.max(1,z)); const k=adj.z/old; adj.dx*=k; adj.dy*=k; $('adjZoom').value=adj.z; reRender(); }
+$('adjBtn').addEventListener('click',()=>setAdjust(true));
+$('adjDone').addEventListener('click',()=>setAdjust(false));
+$('adjReset').addEventListener('click',()=>{ adj={z:1,dx:0,dy:0}; $('adjZoom').value=1; reRender(); });
+$('adjZoom').addEventListener('input',e=>zoomTo(+e.target.value));
+const ptrs=new Map(); let pinch0=0, zoom0=1;
+const scale=()=>W/outImg.clientWidth;
+outImg.addEventListener('pointerdown',e=>{ if(!adjusting) return; e.preventDefault(); outImg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; } });
+outImg.addEventListener('pointermove',e=>{ if(!adjusting||!ptrs.has(e.pointerId)) return; const p=ptrs.get(e.pointerId);
+  if(ptrs.size===1){ adj.dx+=(e.clientX-p.x)*scale(); adj.dy+=(e.clientY-p.y)*scale(); reRender(); }
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2&&pinch0){ const [a,b]=[...ptrs.values()]; zoomTo(zoom0*Math.hypot(a.x-b.x,a.y-b.y)/pinch0); } });
+['pointerup','pointercancel'].forEach(t=>outImg.addEventListener(t,e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch0=0; }));
+outImg.addEventListener('wheel',e=>{ if(!adjusting) return; e.preventDefault(); zoomTo(adj.z*(e.deltaY<0?1.08:1/1.08)); },{passive:false});
 
 // ---------- settings sheet ----------
 let setReturn=null;
