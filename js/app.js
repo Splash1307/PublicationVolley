@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const W=1080;
 const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=8;
+const SEED=9;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
 // Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
@@ -28,7 +28,6 @@ let opps=[
   {name:"Montaigu-Vendée Bouffère Volley-Ball",logo:"assets/logos/montaigu-vendee-bouffere-vb.webp",aka:["Montaigu Vendée Bouffère VB"]},
   {name:"Oya Volley-Ball",logo:"assets/logos/oya-volley-ball-ile-d-yeu.webp",aka:["Oya Volley-Ball (Île d'Yeu)"]},
   {name:"Réveil Sportif Volley-Ball Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
-  {name:"RSVB / SMSA",logo:"assets/logos/entente-rsvb-smsa.webp"},
   {name:"SMSA / Tiffauges",logo:"assets/logos/entente-smsa-tiffauges.webp"},
   {name:"Sporting Club de l'Ouest",logo:"assets/logos/sco-angers-volley.webp"},
   {name:"St Martin / St Aubin Volley",logo:"assets/logos/smsa-volley-ball.webp"},
@@ -52,6 +51,7 @@ function restore(){ try{
   if(Array.isArray(o.opps)){ const t=o.opps.map(x=>x.id?x:{id:uid(),...x}); if(legacy&&o.oppSel!=null&&t[+o.oppSel]) o.oppId=t[+o.oppSel].id; let add=[];
     if(old){ add=opps.filter(d=>{ const m=t.find(x=>low(x.name)===low(d.name)||(d.aka||[]).some(a=>low(a)===low(x.name)));
       if(!m) return true; m.name=d.name; if(d.logo&&(!m.logo||m.logo.startsWith('assets/'))) m.logo=d.logo; return false; }); }
+    const REMOVED=['rsvb / smsa']; if(old) t.splice(0,t.length,...t.filter(x=>!REMOVED.includes(low(x.name))));
     opps=t.concat(add); }
   if(legacy&&o.team){ const m=teams.find(x=>x.name===o.team); o.team=m&&m.id; }
   if(old) setTimeout(store,0); return o; }catch(e){ return null; } }
@@ -197,9 +197,9 @@ function drawPicker(){ drawBtn(); const q=$('oppSearch').value; const list=sorte
   $('oppPick').innerHTML=list.map(o=>`<button type="button" role="option" data-id="${o.id}" aria-selected="${o.id===oppId}">${o.logo?`<img src="${o.logo}" alt="">`:'<span class="nologo">?</span>'}${esc(o.name||'(sans nom)')}</button>`).join('')
     +(list.length?'':'<div class="empty">Aucun club trouvé.</div>')+`<button type="button" role="option" data-id="__free" aria-selected="${oppId==='__free'}"><span class="nologo">+</span>Autre adversaire…</button>`;
   const sel=$('oppPick').querySelector('[aria-selected=true]'); if(sel){ const pk=$('oppPick'); if(sel.offsetTop<pk.scrollTop||sel.offsetTop+sel.offsetHeight>pk.scrollTop+pk.clientHeight) pk.scrollTop=sel.offsetTop-pk.clientHeight/2+sel.offsetHeight/2; } }
-function drawTeams(){ $('teamList').innerHTML=teams.map(t=>`<div class="item"><label class="pick ph" title="Photo par défaut">${teamPhotos[t.id]?`<img src="${teamPhotos[t.id]}" alt="">`:'photo'}<input type="file" accept="image/*" data-tphoto="${t.id}" aria-label="Photo par défaut de ${esc(t.name)}"></label><input type="text" data-t="${t.id}" value="${esc(t.name)}" aria-label="Nom de l'équipe">${teamPhotos[t.id]?`<button type="button" data-tpdel="${t.id}" aria-label="Retirer la photo">Photo ✕</button>`:''}<button type="button" data-tdel="${t.id}" aria-label="Supprimer l'équipe">✕</button></div>`).join('')||'<p class="small">Aucune équipe.</p>'; }
+function drawTeams(){ $('teamList').innerHTML=teams.map(t=>`<div class="item"><label class="pick ph" title="Photo par défaut">${teamPhotos[t.id]?`<img src="${teamPhotos[t.id]}" alt="">`:'photo'}<input type="file" accept="image/*" data-tphoto="${t.id}" aria-label="Photo par défaut de ${esc(t.name)}"></label><input type="text" data-t="${t.id}" value="${esc(t.name)}" aria-label="Nom de l'équipe">${teamPhotos[t.id]?`<button type="button" class="ghost sm" data-tpdel="${t.id}" aria-label="Retirer la photo">Retirer photo</button>`:''}<button type="button" class="del" data-tdel="${t.id}" aria-label="Supprimer l'équipe">✕</button></div>`).join('')||'<p class="small">Aucune équipe.</p>'; }
 function drawClubs(){ const q=$('clubSearch').value; const list=sortedOpps().filter(o=>match(o,q));
-  $('oppList').innerHTML=list.map(o=>`<div class="item"><label class="pick" title="Changer le logo">${o.logo?`<img src="${o.logo}" alt="">`:'logo'}<input type="file" accept="image/*" data-ologo="${o.id}" aria-label="Logo de ${esc(o.name)}"></label><input type="text" data-o="${o.id}" value="${esc(o.name)}" aria-label="Nom du club"><button type="button" data-odel="${o.id}" aria-label="Supprimer">✕</button></div>`).join('')||'<p class="small">Aucun club trouvé.</p>'; }
+  $('oppList').innerHTML=list.map(o=>`<div class="item"><label class="pick" title="Changer le logo">${o.logo?`<img src="${o.logo}" alt="">`:'logo'}<input type="file" accept="image/*" data-ologo="${o.id}" aria-label="Logo de ${esc(o.name)}"></label><input type="text" data-o="${o.id}" value="${esc(o.name)}" aria-label="Nom du club"><button type="button" class="del" data-odel="${o.id}" aria-label="Supprimer ${esc(o.name)}">✕</button></div>`).join('')||'<p class="small">Aucun club trouvé.</p>'; }
 
 $('oppSearch').addEventListener('input',drawPicker);
 function drawBtn(){ const o=curOpp(); $('setOppName').textContent=o.name?(o.name.length>18?o.name.slice(0,17)+'…':o.name):'Adversaire'; const free=oppId==='__free'; $('oppBtn').innerHTML=`${o.logo?`<img src="${o.logo}" alt="">`:`<span class="nologo">${free?'+':'?'}</span>`}<span class="nm">${esc(free?(o.name||'Autre adversaire…'):(o.name||'Choisir un adversaire'))}</span><span class="chev" aria-hidden="true"></span>`; }
@@ -274,7 +274,21 @@ setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) retu
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });
 setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=3);
 
-const saved=restore(); fillTeams(saved&&saved.team); oppId=(saved&&saved.oppId)||(sortedOpps()[0]||{}).id||null; drawPicker(); drawTeams(); drawClubs(); sync();
+// ---------- settings sheet ----------
+let setReturn=null;
+function openSettings(v){ const sh=$('settings'); sh.hidden=!v; document.body.classList.toggle('noscroll',v);
+  if(v){ setReturn=document.activeElement; $('setClose').focus(); } else if(setReturn) setReturn.focus(); }
+$('setOpen').addEventListener('click',()=>openSettings(true));
+$('setClose').addEventListener('click',()=>openSettings(false));
+$('settings').addEventListener('click',e=>{ if(e.target.id==='settings') openSettings(false); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('settings').hidden) openSettings(false); });
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('[data-pane]').forEach(p=>p.hidden=p.dataset.pane!==b.dataset.tab);
+  $('settings').querySelector('.sheet-in').scrollTop=0; }));
+$('lockNow').addEventListener('click',()=>{ try{ localStorage.removeItem('griffonsUnlock'); }catch(e){} location.reload(); });
+
+const saved=restore(); fillTeams(saved&&saved.team); oppId=(saved&&saved.oppId)||null; if(oppId!=='__free'&&!opps.some(o=>o.id===oppId)) oppId=(sortedOpps()[0]||{}).id||null; drawPicker(); drawTeams(); drawClubs(); sync();
 (async()=>{ Object.assign(teamPhotos,await idb.all()); drawTeams(); await loadClubLogo(); await loadOpp(); render();
   try{ await Promise.all([document.fonts.load('100px Anton'),document.fonts.load("600 40px 'Barlow Condensed'")]); }catch(e){} render(); })();
 }

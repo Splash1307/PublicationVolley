@@ -25,6 +25,9 @@
 <header class="top">
   <img id="hdrLogo" alt="">
   <h1>Studio posts · Les Griffons</h1>
+  <button type="button" class="gear" id="setOpen" aria-label="Réglages" title="Réglages">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6a.5.5 0 0 0 .1-.6l-2-3.5a.5.5 0 0 0-.6-.2l-2.5 1a7.3 7.3 0 0 0-1.7-1l-.4-2.6a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4l-.4 2.7a7.3 7.3 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.4a.5.5 0 0 0 .1.6L4.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6a.5.5 0 0 0-.1.6l2 3.5c.1.2.4.3.6.2l2.5-1c.5.4 1.1.7 1.7 1l.4 2.6c0 .3.2.5.5.5h4c.3 0 .5-.2.5-.4l.4-2.7c.6-.3 1.2-.6 1.7-1l2.5 1c.2.1.5 0 .6-.2l2-3.5a.5.5 0 0 0-.1-.6L19.4 13zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+  </button>
   <p>Remplis, télécharge le visuel, publie.</p>
 </header>
 
@@ -81,32 +84,64 @@
       </div>
     </div>
 
-    <details class="panel">
-      <summary>Réglages du club</summary>
-      <h2 style="margin-top:14px">Équipes</h2>
-      <p class="small" style="margin-top:-6px">Le nom sert de titre en haut du visuel. Touche le carré pour choisir la photo par défaut de l'équipe, utilisée quand tu n'ajoutes pas de photo du match.</p>
-      <div id="teamList"></div>
-      <button type="button" id="teamAdd" style="margin-top:8px">+ Ajouter une équipe</button>
-      <h2 style="margin-top:22px">Clubs adverses</h2>
+  </section>
+</main>
+<div class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="setTitle" hidden>
+  <div class="sheet-in">
+    <div class="sheet-head">
+      <img src="assets/logos/griffons.webp" alt="" width="40" height="40">
+      <h2 id="setTitle">Réglages</h2>
+      <button type="button" class="close" id="setClose" aria-label="Fermer les réglages">✕</button>
+    </div>
+    <div class="seg tabs" role="tablist" aria-label="Rubriques des réglages">
+      <button type="button" role="tab" data-tab="club" aria-selected="true">Club</button>
+      <button type="button" role="tab" data-tab="teams" aria-selected="false">Équipes</button>
+      <button type="button" role="tab" data-tab="opps" aria-selected="false">Adversaires</button>
+      <button type="button" role="tab" data-tab="access" aria-selected="false">Accès</button>
+    </div>
+
+    <section class="card" data-pane="club" role="tabpanel">
+      <h3>Logo du club</h3>
+      <div class="logorow">
+        <img id="logoThumb" class="biglogo" alt="Logo actuel">
+        <div class="stack">
+          <label class="btn">Changer le logo<input id="logo" type="file" accept="image/*"></label>
+          <button id="logoReset" type="button" class="ghost">Revenir au logo d'origine</button>
+        </div>
+      </div>
+      <h3>Salle à domicile</h3>
+      <input id="venue" value="Salle Omega, Aizenay" aria-label="Salle à domicile">
+    </section>
+
+    <section class="card" data-pane="teams" role="tabpanel" hidden>
+      <h3>Équipes</h3>
+      <p class="small">Le nom sert de titre en haut du visuel. Touche le carré pour choisir la photo par défaut de l'équipe, utilisée quand tu n'ajoutes pas de photo du match.</p>
+      <div id="teamList" class="list"></div>
+      <button type="button" id="teamAdd" class="add">+ Ajouter une équipe</button>
+    </section>
+
+    <section class="card" data-pane="opps" role="tabpanel" hidden>
+      <h3>Ajouter un club</h3>
       <div class="addclub">
         <label class="pick" id="newLogoPick" title="Logo">logo<input type="file" accept="image/*" id="newLogo" aria-label="Logo du nouveau club"></label>
         <input type="text" id="newName" placeholder="Nom du club" aria-label="Nom du nouveau club">
         <button type="button" id="newAdd" class="main">Ajouter</button>
       </div>
-      <input id="clubSearch" type="search" placeholder="Rechercher dans les clubs…" autocomplete="off" style="margin-top:10px">
-      <div id="oppList"></div>
-      <h2 style="margin-top:22px">Club</h2>
-      <div class="grid">
-        <div class="full">
-          <label for="logo">Logo du club (remplace celui repris de vos posts)</label>
-          <div class="row"><img id="logoThumb" class="thumb" alt=""><input id="logo" type="file" accept="image/*"><button id="logoReset" type="button">Par défaut</button></div>
-        </div>
-        <label class="full">Salle à domicile<input id="venue" value="Salle Omega, Aizenay"></label>
-      </div>
-      <p class="small">Tous ces réglages restent enregistrés dans ton navigateur.</p>
-    </details>
-  </section>
-</main>
+      <h3>Clubs adverses</h3>
+      <input id="clubSearch" type="search" placeholder="Rechercher un club…" autocomplete="off" aria-label="Rechercher dans les clubs">
+      <div id="oppList" class="list"></div>
+    </section>
+
+    <section class="card" data-pane="access" role="tabpanel" hidden>
+      <h3>Code d'accès</h3>
+      <p>Le studio demande un code à 8 chiffres à l'ouverture. Une fois tapé, il est mémorisé sur cet appareil.</p>
+      <button type="button" id="lockNow">Verrouiller cet appareil</button>
+      <p class="small">Le code sera redemandé à la prochaine ouverture, sur cet appareil uniquement.</p>
+    </section>
+
+    <p class="small foot">Ces réglages sont enregistrés dans ce navigateur.</p>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script src="js/app.js?v=dev"></script>
