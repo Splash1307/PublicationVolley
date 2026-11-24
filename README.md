@@ -23,8 +23,8 @@ d'Aizenay. Toucher un match remplit l'équipe, l'adversaire (avec son logo), la 
   club n° `0856001`. Pas d'API officielle : une seule requête publique, sans compte.
 - `scripts/resultats.mjs` télécharge cet export, garde les matchs terminés, remet les sets
   du point de vue d'Aizenay et écrit `data/resultats.json`.
-- Le workflow GitHub Pages lance ce script à chaque déploiement : toutes les heures le
-  week-end, 3 fois par jour en semaine (et à chaque push). Si la FFVB ne répond pas, le
+- Le workflow GitHub Pages lance ce script à chaque déploiement : le
+  week-end toutes les 30 minutes, 3 fois par jour en semaine (et à chaque push). Si la FFVB ne répond pas, le
   dernier fichier publié est conservé.
 - Correspondance compétition → équipe du studio : fonction `teamFor` du script. Les logos
   adverses sont retrouvés par nom puis par numéro de club FFVB (champ `ffvb` dans `js/app.js`).

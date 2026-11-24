@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # Résultats FFVB : toutes les heures le week-end (jours de match), 3 fois par jour en semaine.
+  # Résultats FFVB : toutes les 30 minutes le week-end (jours de match), 3 fois par jour en semaine.
   schedule:
-    - cron: '23 7-23 * * 6,0'
+    - cron: '23,53 7-23 * * 6,0'
     - cron: '23 6,12,18 * * 1-5'
 
 permissions:
