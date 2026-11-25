@@ -324,3 +324,4 @@ button.frm{width:44px;padding:0;flex:none;font-size:20px;color:var(--sky)}
 .frmbar .row{margin:0;gap:8px}
 .frmbar button:not(.main){background:#fff;color:#112f49;min-height:38px}
 .frmbar .ghost{background:transparent!important;text-decoration:underline}
+.tcard.fixed input[type=text]{margin-top:0;background:var(--panel);font-size:17px}
