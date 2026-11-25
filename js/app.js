@@ -268,6 +268,7 @@ function saveFile(blob){ const u=URL.createObjectURL(blob); const a=document.cre
 $('dl').addEventListener('click',()=>{
   if(scoreBlocked()){ toast('Corrige le score avant de télécharger'); openMatch(true); setGrid.scrollIntoView({behavior:'smooth',block:'center'}); return; }
   if(!lastBlob) return;
+  if(!$('dText').value.trim()) regenDesc(); copyForShare($('dText').value);
   const file=new File([lastBlob],fname(),{type:'image/jpeg'});
   if(isTouch()&&navigator.canShare&&navigator.canShare({files:[file]})){
     navigator.share({files:[file]}).catch(e=>{ if(e&&e.name==='AbortError') return; saveFile(file); toast('Image téléchargée (app Fichiers)'); }); return; }
@@ -506,6 +507,12 @@ function descMatch({team,opp,sets,m,cup,date}){ let a=0,b=0; sets.forEach(([x,y]
   return {team,opp,a,b,win,forfait,derby:!!(m&&m.adversaireClub==='0856001'),cup:cup||'',sets,date,home:m?!!m.domicile:null}; } // home : inconnu (null) en saisie manuelle
 function studioMatch(){ return descMatch({team:curTeam().name||'nos Griffons',opp:curOpp().name||'l\'adversaire',sets:parseSets($('sets').value),
   m:curMatch&&curMatch.date===$('date').value?curMatch:null,cup:$('cupLabel').value.trim(),date:$('date').value}); }
+// copie la description juste avant le partage : Instagram ignore le texte envoyé avec les images,
+// il suffit ensuite d'appuyer longuement > Coller dans la légende
+function copyForShare(t){ t=(t||'').trim(); if(!t) return false;
+  const fallback=()=>{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(_){} ta.remove(); };
+  try{ navigator.clipboard.writeText(t).catch(fallback); }catch(e){ fallback(); }
+  setTimeout(()=>toast('Description copiée : colle-la dans Instagram'),300); return true; }
 async function copyText(t){ try{ await navigator.clipboard.writeText(t); }catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(_){} ta.remove(); } toast('Description copiée : colle-la dans Instagram'); }
 let dSeed=1;
 function regenDesc(){ const m=studioMatch(); $('dText').value=m.sets.length?Description.caption([m],{seed:dSeed,tags:$('dTags').checked}):''; }
@@ -605,7 +612,7 @@ $('serReturn').addEventListener('click',()=>{ if(!series||series.editing==null) 
   activeText=null; adjusting=false; drawTextList(); syncMoveUI(); $('serBar').hidden=true; $('series').hidden=false; document.body.classList.add('noscroll'); overview(); });
 $('serClose').addEventListener('click',()=>{ saveSeries(); $('series').hidden=true; document.body.classList.remove('noscroll'); series=null; toast('Série gardée : reprends-la depuis la page Matchs'); });
 // tout télécharger : partage groupé sur téléphone (→ Photos), .zip sur ordinateur
-$('serAll').addEventListener('click',()=>{ const live=series.items.filter(x=>!x.skip&&x.blob); if(!live.length) return;
+$('serAll').addEventListener('click',()=>{ const live=series.items.filter(x=>!x.skip&&x.blob); if(!live.length) return; copyForShare($('sText').value);
   const files=live.map(it=>new File([it.blob],itemName(it),{type:'image/jpeg'}));
   if(isTouch()&&navigator.canShare&&navigator.canShare({files})){ navigator.share({files}).catch(e=>{ if(e&&e.name==='AbortError') return; zipDownload(live); }); return; }
   zipDownload(live); });
