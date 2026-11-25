@@ -251,3 +251,30 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 /* calque des cadres d'édition (pointillés, poignée) au-dessus de l'aperçu */
 #ov{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
 .frame.blocked #ov{display:none}
+
+/* série du week-end */
+.serbtn{background:var(--navy);border-color:var(--navy);color:var(--yel)}
+.sercount{margin:4px 0 2px;font:700 14px 'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.serinfo{margin:0 0 10px;display:flex;flex-direction:column}
+.serinfo b{font:700 22px/1.15 'Barlow Condensed',sans-serif}
+.serinfo small{color:var(--mute)}
+.serprev{display:block;width:100%;max-height:52vh;object-fit:contain;border-radius:12px;background:#0a1520}
+#serStep1.skipped .serprev{opacity:.3}
+.serphoto{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 4px}
+.serphoto #serDef[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.serphoto .btn:not(.on){background:var(--panel);border:1px solid var(--line);color:var(--ink)}
+.sernav{position:sticky;bottom:0;display:flex;gap:10px;justify-content:space-between;padding:12px 0 4px;background:var(--bg)}
+.sernav .main{flex:1}
+.sergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:12px 0}
+.sthumb{display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:12px;background:var(--panel);text-align:left;font-weight:400;min-height:0}
+.sthumb img{width:100%;border-radius:8px;display:block}
+.sthumb span{display:flex;flex-direction:column;min-width:0}
+.sthumb b{font:700 15px/1.2 'Barlow Condensed',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sthumb small{font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sthumb i{font-style:normal;font-size:12px;font-weight:600;color:var(--sky)}
+.serbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px 16px;background:var(--yel);color:#112f49;font-weight:600}
+.serbar .main{background:var(--navy);border-color:var(--navy);color:#fff;min-height:38px}
+.serphoto{margin:0 0 12px}
+.serphoto #serSkip{margin-left:auto}
+#serStep1,#serStep2{padding-bottom:8px}
+@media(max-width:480px){.serprev{max-height:46vh}.serinfo b{font-size:20px}}
