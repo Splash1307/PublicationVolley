@@ -8,7 +8,7 @@ const ov=document.getElementById('ov'), ox=ov.getContext('2d'); // calque des ca
 let lastBlob=null; // image propre du dernier rendu, prête à enregistrer / partager tout de suite
 const dataUrlBlob=u=>{ const [h,d]=u.split(','), bin=atob(d), a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:h.slice(5,h.indexOf(';'))}); };
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=11;
+const SEED=12;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
 // Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
@@ -32,6 +32,7 @@ let opps=[
   {name:"Oya Volley-Ball",ffvb:"0859365",logo:"assets/logos/oya-volley-ball-ile-d-yeu.webp",aka:["Oya Volley-Ball (Île d'Yeu)"]},
   {name:"Réveil Sportif Volley-Ball Tiffauges",logo:"assets/logos/reveil-sportif-vb-tiffauges.webp"},
   {name:"SMSA / Tiffauges",ffvb:"0858913",logo:"assets/logos/entente-smsa-tiffauges.webp"},
+  {name:"Saint-Macaire Volley-Ball",ffvb:"0495295",logo:"assets/logos/saint-macaire-volley-ball.webp"},
   {name:"Sporting Club de l'Ouest",ffvb:"0491492",logo:"assets/logos/sco-angers-volley.webp"},
   {name:"St Martin / St Aubin Volley",logo:"assets/logos/smsa-volley-ball.webp"},
   {name:"Vendrennes Volley-Ball",ffvb:"0858707",logo:"assets/logos/volley-vendrennes-vvb.webp",aka:["Volley Vendrennes (VVB)"]},
