@@ -45,7 +45,7 @@ let opps=[
 const SETTINGS=['venue'];
 const teamPhotos={};
 // photos d'équipe par défaut, dans le dépôt (assets/equipes) : utilisées si l'appareil n'a pas sa propre photo
-const TEAM_PHOTOS={'regionale masculine':'assets/equipes/regionale-masculine.jpg','departementale feminine 2':'assets/equipes/departementale-feminine-2.jpg'};
+const TEAM_PHOTOS={'regionale masculine':'assets/equipes/regionale-masculine.jpg','departementale feminine 2':'assets/equipes/departementale-feminine-2.jpg','m18 masculine':'assets/equipes/m18-masculine.jpg'};
 const teamPhoto=t=>t&&(teamPhotos[t.id]||TEAM_PHOTOS[norm(t.name).trim()]||null); // id -> dataURL (kept in IndexedDB)
 
 // ---------- storage ----------
