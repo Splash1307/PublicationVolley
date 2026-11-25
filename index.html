@@ -37,6 +37,7 @@
   <p>Remplis, télécharge le visuel, publie.</p>
 </header>
 
+<div class="serbar" id="serBar" hidden>Visuel <b id="serBarN"></b> de la série<button type="button" id="serReturn" class="main">Revenir à la série</button></div>
 <main class="wrap">
   <section class="preview" aria-label="Aperçu du post">
     <div class="frame"><img id="out" alt="Aperçu du visuel Instagram"><canvas id="ov" aria-hidden="true"></canvas></div>
@@ -115,11 +116,40 @@
 
   </section>
 </main>
+<div class="sheet" id="series" role="dialog" aria-modal="true" aria-labelledby="serTitle" hidden>
+  <div class="sheet-in">
+    <div class="sheet-head">
+      <img src="assets/logos/griffons.webp" alt="" width="40" height="40">
+      <h2 id="serTitle">Week-end</h2>
+      <button type="button" class="close" id="serClose" aria-label="Quitter la série">✕</button>
+    </div>
+    <div id="serStep1">
+      <p class="sercount" id="serCount"></p>
+      <p class="serinfo"><b id="serTeam"></b><small id="serLine"></small></p>
+      <div class="serphoto">
+        <button type="button" id="serDef" aria-pressed="true">Photo par défaut</button>
+        <span class="small" id="serNoDef" hidden>Pas de photo par défaut pour cette équipe.</span>
+        <label class="btn" id="serImp">Importer une photo<input type="file" id="serFile" accept="image/*"></label>
+        <button type="button" id="serSkip" class="ghost">Ignorer ce match</button>
+      </div>
+      <img id="serPrev" class="serprev" alt="Aperçu du visuel">
+      <div class="sernav"><button type="button" id="serBackBtn">Précédent</button><button type="button" id="serNext" class="main">Suivant</button></div>
+    </div>
+    <div id="serStep2" hidden>
+      <div class="seg" role="group" aria-label="Format de tous les visuels"><button type="button" data-sfmt="1350" aria-pressed="true">Post 4:5</button><button type="button" data-sfmt="1920" aria-pressed="false">Story</button></div>
+      <div class="sergrid" id="serGrid"></div>
+      <div class="sernav"><button type="button" id="serBack">Revoir les photos</button><button type="button" id="serAll" class="main">Tout télécharger</button></div>
+    </div>
+  </div>
+</div>
 <div class="sheet" id="results" role="dialog" aria-modal="true" aria-labelledby="resTitle" hidden>
   <div class="sheet-in">
     <div class="sheet-head">
       <img src="assets/logos/griffons.webp" alt="" width="40" height="40">
       <h2 id="resTitle">Matchs</h2>
+      <button type="button" class="newpub serbtn" id="serStart" title="Tout le week-end : préparer tous les visuels" aria-label="Préparer les visuels de tout le week-end">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4V6zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 14H8V4h12v12zm-8.5-5.5 2 2.5 3-4 4 5H9l2.5-3.5z"/></svg>
+      </button>
       <button type="button" class="newpub" id="newBlank" title="Nouvelle publication vierge" aria-label="Nouvelle publication vierge">+</button>
       <button type="button" class="close" id="resClose" aria-label="Fermer la page Matchs">✕</button>
     </div>

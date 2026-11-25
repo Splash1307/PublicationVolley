@@ -301,7 +301,7 @@ function setError(n,x,y){ const t=n===bestOf?15:25, w=Math.max(x,y), l=Math.min(
   if(l>t-2&&w!==l+2) return `Set ${n} : ${x}-${y} impossible, il faut 2 points d'écart (ex. ${l+2}-${l}).`;
   return ''; }
 const scoreBlocked=()=>$('setsErr').textContent!=='';
-function syncSets(){
+function syncSets(quiet){
   const done=[], errs=[]; let a=0,b=0, shown=WIN();
   for(let i=0;i<5;i++){
     const xs=cell(i,0).value, ys=cell(i,1).value, x=+xs, y=+ys;
@@ -313,7 +313,7 @@ function syncSets(){
   }
   setGrid.querySelectorAll('[data-row]').forEach(el=>el.hidden=+el.dataset.row>=shown);
   $('sets').value=done.join(', '); $('setsErr').textContent=errs.join('\n');
-  const blocked=errs.length>0; if(blocked) openMatch(true); $('dl').setAttribute('aria-disabled',blocked); document.querySelector('.frame').classList.toggle('blocked',blocked); render();
+  const blocked=errs.length>0; if(blocked) openMatch(true); $('dl').setAttribute('aria-disabled',blocked); document.querySelector('.frame').classList.toggle('blocked',blocked); if(!quiet) render();
 }
 setGrid.addEventListener('input',e=>{ const t=e.target; if(!t.dataset.side) return; t.value=t.value.replace(/\D/g,'').slice(0,2); syncSets();
   if(t.value.length===2){ const ins=[...setGrid.querySelectorAll('input')].filter(x=>!x.hidden); const n=ins[ins.indexOf(t)+1]; if(n) n.focus(); } });
@@ -460,15 +460,19 @@ function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p 
       <span class="rfoot"><span>${fmtD(m.date)}${m.heure&&m.heure!=='00:00'?' · '+m.heure.replace(':','h'):''}</span><span>${m.domicile?'À domicile':'À l\'extérieur'}${m.salle?' · '+esc(cap(m.salle)):''}</span></span>
     </button>`; }).join('')).join('');
   $('resMore').hidden=groups.length<=many; }
-function applyResult(m){
+// remplit le studio avec un match FFVB (sans rendu ni interface)
+function fillFromMatch(m){
   kind='result'; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.kind==='result'));
   const t=m.equipe&&teams.find(x=>norm(x.name)===norm(m.equipe));
   if(t) $('team').value=t.id;
   const o=findOpp(m); if(o){ oppId=o.id; } else { oppId='__free'; $('opp').value=cap(m.adversaire); }
   $('date').value=m.date; $('cupLabel').value=cupLabel(m);
-  const nums=m.score.map(Number).filter(Number.isFinite); setBestOf(nums.length&&Math.max(...nums)===2?3:5);
+  const nums=m.score.map(Number).filter(Number.isFinite); bestOf=nums.length&&Math.max(...nums)===2?3:5;
+  document.querySelectorAll('[data-bo]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.bo===bestOf));
   for(let i=0;i<5;i++){ const st=m.sets[i]; cell(i,0).value=st?st[0]:''; cell(i,1).value=st?st[1]:''; }
-  drawBtn(); drawPicker(); sync(); store(); syncSets(); loadOpp().then(render);
+  drawBtn(); drawPicker(); sync(); store(); syncSets(true); return t; }
+function applyResult(m){
+  const t=fillFromMatch(m); loadOpp().then(render);
   openResults(false);
   toast(t?`${t.name} · match importé`:'Match importé : choisis l\'équipe');
   if(!t) $('team').focus(); }
@@ -492,6 +496,88 @@ function newBlank(){
 $('newBlank').addEventListener('click',newBlank);
 ['fTeam','fWeek','fComp'].forEach(id=>$(id).addEventListener('change',drawResults));
 $('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(!b) return; const m=results.matchs.find(x=>x.code===b.dataset.code); if(m) applyResult(m); });
+
+// ---------- série du week-end ----------
+// « Tout le week-end » : photo match par match (Suivant), puis vue d'ensemble (post / story),
+// retouche d'un visuel dans le studio, et « Tout télécharger ». Les photos restent sur l'appareil.
+let series=null; // {items:[{m,skip,snap,url,blob}], i, editing}
+const clone=o=>JSON.parse(JSON.stringify(o));
+function takeSnap(){ return {team:$('team').value, oppId, oppFree:$('opp').value, date:$('date').value, cup:$('cupLabel').value, bestOf,
+  cells:[0,1,2,3,4].map(i=>[cell(i,0).value,cell(i,1).value]), matchPhoto, adj:{...adj}, texts:clone(texts)}; }
+async function restoreSnap(sn){
+  $('team').value=sn.team; oppId=sn.oppId; $('opp').value=sn.oppFree; $('date').value=sn.date; $('cupLabel').value=sn.cup;
+  bestOf=sn.bestOf; document.querySelectorAll('[data-bo]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.bo===bestOf));
+  sn.cells.forEach(([x,y],i)=>{ cell(i,0).value=x; cell(i,1).value=y; });
+  matchPhoto=sn.matchPhoto; $('photo').value=''; texts=clone(sn.texts); activeText=null; adjusting=false;
+  drawBtn(); drawPicker(); sync(); drawTextList(); syncMoveUI(); syncSets(true); await loadOpp();
+  adjPhoto=await currentPhoto(); adj={...sn.adj}; }
+const itemName=it=>`resultat-${slug(teams.find(t=>t.id===it.snap.team)?.name||'equipe')}-${slug(it.m.adversaire)}-${it.m.date}.jpg`;
+function weekendCodes(){ const codes=[]; let seen=0; // matchs du 1er week-end affiché (filtres compris)
+  for(const el of $('resList').children){ if(el.tagName==='H3'){ if(seen++) break; } else if(el.dataset.code) codes.push(el.dataset.code); } return codes; }
+function startSeries(){
+  const codes=weekendCodes(); if(!codes.length){ toast('Aucun match à préparer'); return; }
+  series={items:codes.map(c=>({m:results.matchs.find(x=>x.code===c),skip:false,snap:null})),i:0,editing:null,
+    label:wkLabel(weekendOf(results.matchs.find(x=>x.code===codes[0]).date))};
+  openResults(false); $('series').hidden=false; document.body.classList.add('noscroll'); $('serTitle').textContent=series.label.replace('Week-end du ','Week-end ');
+  showStep(1); showItem(0); }
+function showStep(n){ $('serStep1').hidden=n!==1; $('serStep2').hidden=n!==2; }
+async function showItem(i){ series.i=i; const it=series.items[i];
+  if(!it.snap){ fillFromMatch(it.m); matchPhoto=null; texts=[]; activeText=null; adjusting=false; drawTextList(); adj={z:1,dx:0,dy:0}; adjPhoto=null; await loadOpp(); it.snap=takeSnap(); }
+  else await restoreSnap(it.snap);
+  await render(); it.snap=takeSnap(); $('serPrev').src=$('out').src;
+  const [a,b]=it.m.score, team=teams.find(t=>t.id===it.snap.team);
+  $('serCount').textContent=`Match ${i+1} / ${series.items.length}`;
+  $('serTeam').textContent=team?team.name:cap(it.m.aizenay);
+  $('serLine').textContent=`${it.m.domicile?'contre':'chez'} ${cap(it.m.adversaire)} · ${a} - ${b}`;
+  const hasDef=!!(team&&teamPhotos[team.id]);
+  $('serDef').hidden=!hasDef; $('serNoDef').hidden=hasDef;
+  $('serDef').setAttribute('aria-pressed',!it.snap.matchPhoto); $('serImp').classList.toggle('on',!!it.snap.matchPhoto);
+  $('serSkip').textContent=it.skip?'Reprendre ce match':'Ignorer ce match'; $('serStep1').classList.toggle('skipped',it.skip);
+  $('serBackBtn').hidden=i===0; $('serNext').textContent=i===series.items.length-1?'Voir tout':'Suivant'; }
+$('serDef').addEventListener('click',async()=>{ matchPhoto=null; adj={z:1,dx:0,dy:0}; await showItemRefresh(); });
+$('serFile').addEventListener('change',async e=>{ const f=e.target.files[0]; if(!f) return; matchPhoto=await img(await shrink(f,1920)); adj={z:1,dx:0,dy:0}; e.target.value=''; await showItemRefresh(); });
+async function showItemRefresh(){ const it=series.items[series.i]; adjPhoto=await currentPhoto(); it.snap=takeSnap(); await showItem(series.i); }
+$('serSkip').addEventListener('click',()=>{ const it=series.items[series.i]; it.skip=!it.skip; if(it.skip&&series.i<series.items.length-1) showItem(series.i+1); else showItem(series.i); });
+$('serBackBtn').addEventListener('click',()=>{ if(series.i>0) showItem(series.i-1); });
+$('serNext').addEventListener('click',()=>{ if(series.i<series.items.length-1) showItem(series.i+1); else overview(); });
+async function overview(){ showStep(2); const live=series.items.filter(x=>!x.skip);
+  document.querySelectorAll('[data-sfmt]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.sfmt===H));
+  $('serGrid').innerHTML='<p class="small">Préparation des visuels…</p>';
+  for(const it of live){ await restoreSnap(it.snap); await render(); it.url=$('out').src; it.blob=lastBlob; }
+  $('serGrid').innerHTML=live.length?live.map(it=>{ const k=series.items.indexOf(it), team=teams.find(t=>t.id===it.snap.team);
+    return `<button type="button" class="sthumb" data-k="${k}"><img src="${it.url}" alt=""><span><b>${esc(team?team.name:cap(it.m.aizenay))}</b><small>${esc(cap(it.m.adversaire))} · ${esc(it.m.score.join(' - '))}</small></span><i>✎ Retoucher</i></button>`; }).join('')
+    :'<p class="small">Tous les matchs sont ignorés.</p>';
+  $('serAll').disabled=!live.length; $('serAll').textContent=live.length>1?`Tout télécharger (${live.length})`:'Télécharger'; }
+document.querySelectorAll('[data-sfmt]').forEach(b=>b.addEventListener('click',()=>{ H=+b.dataset.sfmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.fmt===H)); overview(); }));
+$('serBack').addEventListener('click',()=>{ showStep(1); showItem(0); });
+// retoucher un visuel dans le studio, puis revenir à la série
+$('serGrid').addEventListener('click',async e=>{ const b=e.target.closest('.sthumb'); if(!b) return; const k=+b.dataset.k;
+  series.editing=k; $('series').hidden=true; document.body.classList.remove('noscroll');
+  await restoreSnap(series.items[k].snap); await render();
+  $('serBarN').textContent=`${series.items.filter(x=>!x.skip).indexOf(series.items[k])+1} / ${series.items.filter(x=>!x.skip).length}`; $('serBar').hidden=false; window.scrollTo({top:0,behavior:'smooth'}); });
+$('serReturn').addEventListener('click',()=>{ if(!series||series.editing==null) return; series.items[series.editing].snap=takeSnap(); series.editing=null;
+  activeText=null; adjusting=false; drawTextList(); syncMoveUI(); $('serBar').hidden=true; $('series').hidden=false; document.body.classList.add('noscroll'); overview(); });
+$('serClose').addEventListener('click',()=>{ $('series').hidden=true; document.body.classList.remove('noscroll'); series=null; });
+// tout télécharger : partage groupé sur téléphone (→ Photos), .zip sur ordinateur
+$('serAll').addEventListener('click',()=>{ const live=series.items.filter(x=>!x.skip&&x.blob); if(!live.length) return;
+  const files=live.map(it=>new File([it.blob],itemName(it),{type:'image/jpeg'}));
+  if(isTouch()&&navigator.canShare&&navigator.canShare({files})){ navigator.share({files}).catch(e=>{ if(e&&e.name==='AbortError') return; zipDownload(live); }); return; }
+  zipDownload(live); });
+async function zipDownload(live){ const files=[]; for(const it of live) files.push({name:itemName(it),data:new Uint8Array(await it.blob.arrayBuffer())});
+  const u=URL.createObjectURL(zipStore(files)); const a=document.createElement('a'); a.href=u; a.download=`visuels-${slug(series.label)}.zip`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),8000); toast(`${files.length} visuels téléchargés (.zip)`); }
+// .zip sans compression (les JPEG sont déjà compressés)
+const CRC=(()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } return t; })();
+const crc32=d=>{ let c=0xFFFFFFFF; for(let i=0;i<d.length;i++) c=CRC[(c^d[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; };
+function zipStore(files){ const enc=new TextEncoder(), parts=[], central=[]; let off=0;
+  for(const f of files){ const name=enc.encode(f.name), crc=crc32(f.data), h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint32(14,crc,true); h.setUint32(18,f.data.length,true); h.setUint32(22,f.data.length,true); h.setUint16(26,name.length,true);
+    parts.push(h,name,f.data);
+    const c=new DataView(new ArrayBuffer(46)); c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint32(16,crc,true); c.setUint32(20,f.data.length,true); c.setUint32(24,f.data.length,true); c.setUint16(28,name.length,true); c.setUint32(42,off,true);
+    central.push(c,name); off+=30+name.length+f.data.length; }
+  const size=central.reduce((n,x)=>n+x.byteLength,0), e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true); e.setUint16(8,files.length,true); e.setUint16(10,files.length,true); e.setUint32(12,size,true); e.setUint32(16,off,true);
+  return new Blob([...parts,...central,e],{type:'application/zip'}); }
+$('serStart').addEventListener('click',startSeries);
 
 // ---------- settings sheet ----------
 let setReturn=null;
