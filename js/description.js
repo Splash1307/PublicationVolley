@@ -1,6 +1,6 @@
 // Génère la description Instagram d'une publication, dans le style des posts du club.
 // Pas d'IA : des modèles inspirés des publications existantes, avec plusieurs variantes.
-// Entrée : une liste de matchs normalisés {team, opp, a, b, win, forfait, derby, cup, sets, date}.
+// Entrée : une liste de matchs normalisés {team, opp, a, b, win, forfait, derby, cup, sets, date, home}.
 (function () {
   const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
   const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
@@ -79,9 +79,10 @@
     else if (losses === list.length) out.push('Un week-end plus compliqué pour nos équipes, mais toujours avec l\'envie et l\'esprit d\'équipe ! On se remobilise pour la suite 💪');
     else out.push(pick(r, ['Des victoires, des matchs disputés et de belles performances sur les terrains. Bravo à toutes nos équipes pour leur engagement !', 'Entre belles victoires, matchs accrochés et rencontres plus compliquées, nos équipes ont une nouvelle fois porté les couleurs d\'Aizenay sur les terrains.']));
 
-    // remerciements et conclusion
-    out.push('');
-    out.push(pick(r, ['Merci à nos supporters pour leurs encouragements ! 💙', 'Bravo à tous les joueurs et joueuses, et merci aux supporters pour leur présence ! 👏', 'Merci à tous nos supporters ! 💙💛']));
+    // remerciements : les supporters seulement s'il y a eu au moins un match à domicile
+    const home = list.some(m => m.home === true);
+    if (home) { out.push(''); out.push(pick(r, ['Merci à nos supporters pour leurs encouragements ! 💙', 'Bravo à tous les joueurs et joueuses, et merci aux supporters pour leur présence ! 👏', 'Merci à tous nos supporters ! 💙💛'])); }
+    else if (!single && !/bravo/i.test(out[out.length - 1])) { out.push(''); out.push('Bravo à tous les joueurs et joueuses pour ce week-end de compétition ! 👏'); }
     out.push('');
     out.push(pick(r, ['Rendez-vous le week-end prochain !', 'On continue, rendez-vous le week-end prochain ! 🦅', 'Rendez-vous le week-end prochain ! 💙💛']));
     if (opt.tags) { out.push(''); out.push(TAGS); }

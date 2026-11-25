@@ -503,7 +503,7 @@ $('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(
 // js/description.js écrit le texte (modèles inspirés des posts du club) ; ici on lui donne les matchs.
 function descMatch({team,opp,sets,m,cup,date}){ let a=0,b=0; sets.forEach(([x,y])=>x>y?a++:b++);
   let win=a>b; const forfait=!!(m&&m.forfait); if(forfait) win=m.score[0]!=='F'&&m.score[0]!=='P';
-  return {team,opp,a,b,win,forfait,derby:!!(m&&m.adversaireClub==='0856001'),cup:cup||'',sets,date}; }
+  return {team,opp,a,b,win,forfait,derby:!!(m&&m.adversaireClub==='0856001'),cup:cup||'',sets,date,home:m?!!m.domicile:null}; } // home : inconnu (null) en saisie manuelle
 function studioMatch(){ return descMatch({team:curTeam().name||'nos Griffons',opp:curOpp().name||'l\'adversaire',sets:parseSets($('sets').value),
   m:curMatch&&curMatch.date===$('date').value?curMatch:null,cup:$('cupLabel').value.trim(),date:$('date').value}); }
 async function copyText(t){ try{ await navigator.clipboard.writeText(t); }catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(_){} ta.remove(); } toast('Description copiée : colle-la dans Instagram'); }
