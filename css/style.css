@@ -284,3 +284,12 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .resume .ghost{color:#112f49}
 .resume .main{background:var(--navy);border-color:var(--navy);color:#fff;min-height:38px}
 #serDrop{display:block;margin:4px 0 0}
+
+/* description Instagram */
+.desc h3{font:700 19px 'Barlow Condensed',sans-serif;margin:18px 0 8px}
+.desc textarea{margin-top:0;font-size:15px;line-height:1.45;background:var(--panel)}
+.panel.desc textarea{background:var(--bg)}
+.drow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px}
+.drow .sp{flex:1}
+.chk{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);font-weight:600;cursor:pointer}
+.chk input{width:20px;height:20px;min-height:0;margin:0;accent-color:var(--navy)}
