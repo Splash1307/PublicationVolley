@@ -46,6 +46,12 @@
       <button class="main" id="dl" hidden>Télécharger l'image</button>
       <button type="button" id="adjBtn" hidden>Ajuster la photo</button>
       <button type="button" id="adjDone" class="main" hidden>Terminé</button>
+      <div class="rotbar" id="adjRot" hidden>
+        <button type="button" id="rotL" title="Tourner à gauche (90°)" aria-label="Tourner la photo à gauche">⟲</button>
+        <label class="rotsl"><span>Rotation</span><input type="range" id="rotVal" min="-180" max="180" step="1" value="0" aria-label="Rotation de la photo en degrés"></label>
+        <button type="button" id="rotR" title="Tourner à droite (90°)" aria-label="Tourner la photo à droite">⟳</button>
+        <button type="button" id="rot0" class="ghost sm">0°</button>
+      </div>
     </div>
     </div>
   </section>
