@@ -108,10 +108,21 @@ function contain(im,cx,cy,bw,bh){ const r=Math.min(bw/im.width,bh/im.height); ct
 // ---------- poster ----------
 const PHOTO_BOTTOM=980; // canvas y (4:5 layout): the photo is framed so its bottom sits just above the score plate
 const PHOTO_EXT=1120;   // the photo is still painted down to here, behind the plate and the waves
+// photo tournée (adj.r en degrés) : agrandie juste assez pour toujours couvrir la zone photo, sans coin vide
+function drawRotated(photo,PH){ const EXT=PHOTO_EXT+(H-1350), a=adj.r*Math.PI/180, c=Math.abs(Math.cos(a)), s=Math.abs(Math.sin(a));
+  ctx.fillStyle=C.navy2; ctx.fillRect(0,0,W,H);
+  const Aw=W*c+EXT*s, Ah=W*s+EXT*c, r=Math.max(Aw/photo.width,Ah/photo.height)*adj.z, w=photo.width*r, h=photo.height*r;
+  // décalage limité pour que la photo couvre toujours la zone (dans le repère de la photo)
+  const mx=(w-Aw)/2, my=(h-Ah)/2, ux=adj.dx*Math.cos(-a)-adj.dy*Math.sin(-a), uy=adj.dx*Math.sin(-a)+adj.dy*Math.cos(-a);
+  const cx=Math.max(-mx,Math.min(mx,ux)), cy=Math.max(-my,Math.min(my,uy));
+  adj.dx=cx*Math.cos(a)-cy*Math.sin(a); adj.dy=cx*Math.sin(a)+cy*Math.cos(a);
+  ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,EXT); ctx.clip(); ctx.translate(W/2+adj.dx,EXT/2+adj.dy); ctx.rotate(a); ctx.drawImage(photo,-w/2,-h/2,w,h); ctx.restore();
+  const t=ctx.createLinearGradient(0,0,0,300); t.addColorStop(0,'rgba(0,0,0,.35)'); t.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=t; ctx.fillRect(0,0,W,300); }
 function backdrop(){
   if(photo){ const PH=PHOTO_BOTTOM+(H-1350); // the photo fills the area above the score plate (PH), so nothing important hides behind it
     if(photo!==adjPhoto){ const f=photo!==matchPhoto&&teamFrames[curTeam().id]; // cadrage par défaut de l'équipe (réglages)
-      adj=f?{z:f.z,dx:f.fx*W,dy:f.fy*PH}:{z:1,dx:0,dy:0}; adjPhoto=photo; }
+      adj=f?{z:f.z,dx:f.fx*W,dy:f.fy*PH,r:f.r||0}:{z:1,dx:0,dy:0,r:0}; adjPhoto=photo; }
+    if(adj.r){ drawRotated(photo,PH); return; }
     ctx.fillStyle=C.navy2; ctx.fillRect(0,0,W,H);
     const r=Math.max(W/photo.width,PH/photo.height)*adj.z, w=photo.width*r, h=photo.height*r;
     const bx=(W-w)/2, by=Math.min(0,(PH-h)*.35);
@@ -335,13 +346,18 @@ let adjusting=false, activeText=null, adjRaf=0;
 const frame=document.querySelector('.frame'), outImg=$('out');
 const reRender=()=>{ if(!adjRaf) adjRaf=requestAnimationFrame(()=>{ adjRaf=0; render(); }); };
 const canAdjust=()=>!!photo;
-function syncMoveUI(){ frame.classList.toggle('adjusting',adjusting||!!activeText); $('adjBtn').hidden=adjusting||!canAdjust(); $('adjDone').hidden=!adjusting; }
+function syncMoveUI(){ frame.classList.toggle('adjusting',adjusting||!!activeText); $('adjBtn').hidden=adjusting||!canAdjust(); $('adjDone').hidden=!adjusting; $('adjRot').hidden=!adjusting; if(adjusting) $('rotVal').value=Math.round(((adj.r||0)%360+540)%360-180); }
 function setAdjust(v){ adjusting=v; if(v) activeText=null; if(!v){ ptrs.clear(); drag=null; } drawTextList(); syncMoveUI(); render(); }
 function setActive(id){ activeText=id; if(id) adjusting=false; drawTextList(); syncMoveUI(); render(); }
 function zoomTo(z){ const old=adj.z; adj.z=Math.min(4,Math.max(1,z)); const k=adj.z/old; adj.dx*=k; adj.dy*=k; reRender(); }
 $('adjBtn').addEventListener('click',()=>setAdjust(true));
 $('adjDone').addEventListener('click',()=>setAdjust(false));
-const ptrs=new Map(); let pinch0=0, zoom0=1;
+function setRot(d){ adj.r=((d%360)+540)%360-180; $('rotVal').value=Math.round(adj.r); reRender(); }
+$('rotL').addEventListener('click',()=>setRot((adj.r||0)-90));
+$('rotR').addEventListener('click',()=>setRot((adj.r||0)+90));
+$('rotVal').addEventListener('input',e=>setRot(+e.target.value));
+$('rot0').addEventListener('click',()=>setRot(0));
+const ptrs=new Map(); let pinch0=0, zoom0=1, ang0=0, rot0=0;
 // the preview <img> may be letterboxed (object-fit: contain), so map from its real content box
 function toCanvas(e){ const r=outImg.getBoundingClientRect(), cw=Math.min(r.width,r.height*W/H), ch=cw*H/W;
   return {x:(e.clientX-r.left-(r.width-cw)/2)*W/cw, y:(e.clientY-r.top-(r.height-ch)/2)*H/ch}; }
@@ -357,7 +373,7 @@ outImg.addEventListener('pointerdown',e=>{
   if(ptrs.size===1){ if(onHandle&&ab.fixed){ const o=getT(activeText); drag='size'; size0={o,k:o.k||1,d:Math.max(20,Math.hypot(c.x-ab.cx,c.y-ab.cy)),cx:ab.cx,cy:ab.cy}; }
     else if(onHandle){ const t=texts.find(x=>x.id===activeText); drag='size'; size0={t,size:t.size,d:Math.max(20,Math.hypot(c.x-t.x,c.y-t.y))}; }
     else drag=hit?hit.id:(adjusting&&photo?'photo':null); }
-  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; const t=activeText&&texts.find(x=>x.id===activeText); if(t) size0={t,size:t.size}; else if(activeText){ const o=getT(activeText); size0={o,k:o.k||1}; } drag=null; } });
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; ang0=Math.atan2(b.y-a.y,b.x-a.x); rot0=adj.r||0; const t=activeText&&texts.find(x=>x.id===activeText); if(t) size0={t,size:t.size}; else if(activeText){ const o=getT(activeText); size0={o,k:o.k||1}; } drag=null; } });
 outImg.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; const p=ptrs.get(e.pointerId);
   if(ptrs.size===1&&drag==='size'&&size0.o){ const c=toCanvas(e); size0.o.k=Math.min(3,Math.max(.35,size0.k*Math.hypot(c.x-size0.cx,c.y-size0.cy)/size0.d)); reRender(); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); return; }
   if(ptrs.size===1&&drag==='size'){ const c=toCanvas(e), t=size0.t; t.size=Math.round(Math.min(TEXT_MAX,Math.max(TEXT_MIN,size0.size*Math.hypot(c.x-t.x,c.y-t.y)/size0.d))); reRender(); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); return; }
@@ -366,6 +382,7 @@ outImg.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; co
     reRender(); }
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(ptrs.size===2&&pinch0){ const [a,b]=[...ptrs.values()], k=Math.hypot(a.x-b.x,a.y-b.y)/pinch0;
+    if(adjusting&&photo&&!activeText){ const da=(Math.atan2(b.y-a.y,b.x-a.x)-ang0)*180/Math.PI; if(Math.abs(da)>3) setRot(rot0+da); }
     if(activeText&&size0&&size0.o){ size0.o.k=Math.min(3,Math.max(.35,size0.k*k)); reRender(); } else if(activeText&&size0){ size0.t.size=Math.round(Math.min(TEXT_MAX,Math.max(TEXT_MIN,size0.size*k))); reRender(); } else if(adjusting&&photo) zoomTo(zoom0*k); } });
 ['pointerup','pointercancel'].forEach(t=>outImg.addEventListener(t,e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch0=0; if(!ptrs.size) drag=null; }));
 outImg.addEventListener('wheel',e=>{ if(!adjusting||!photo) return; e.preventDefault(); zoomTo(adj.z*(e.deltaY<0?1.08:1/1.08)); },{passive:false});
@@ -758,14 +775,14 @@ $('teamList').addEventListener('click',async e=>{ const id=e.target.dataset.tfra
   $('team').value=id; matchPhoto=null; texts=[]; activeText=null; drawTextList(); sync(); adjPhoto=null; await render();
   $('frmName').textContent=curTeam().name; $('frmBar').hidden=false; setAdjust(true); window.scrollTo({top:0,behavior:'smooth'}); });
 async function endFraming(save){ if(!framing) return;
-  if(save){ const PH=PHOTO_BOTTOM+(H-1350); teamFrames[framing.teamId]={z:adj.z,fx:adj.dx/W,fy:adj.dy/PH}; store(); toast('Cadrage enregistré pour '+(teams.find(t=>t.id===framing.teamId)||{}).name); }
+  if(save){ const PH=PHOTO_BOTTOM+(H-1350); teamFrames[framing.teamId]={z:adj.z,fx:adj.dx/W,fy:adj.dy/PH,r:adj.r||0}; store(); toast('Cadrage enregistré pour '+(teams.find(t=>t.id===framing.teamId)||{}).name); }
   const f=framing; framing=null; $('frmBar').hidden=true; setAdjust(false);
   await restoreSnap(f.snap); if(save&&!f.snap.matchPhoto&&f.snap.team===f.teamId) adjPhoto=null; // même équipe : on applique le nouveau cadrage
   await render();
   $('serBar').hidden=!f.seriesBar; openSettings(true); document.querySelector('[data-tab=teams]').click(); }
 $('frmSave').addEventListener('click',()=>endFraming(true));
 $('frmCancel').addEventListener('click',()=>endFraming(false));
-$('frmReset').addEventListener('click',()=>{ adj={z:1,dx:0,dy:0}; render(); });
+$('frmReset').addEventListener('click',()=>{ adj={z:1,dx:0,dy:0,r:0}; syncMoveUI(); render(); });
 
 // ---------- settings sheet ----------
 let setReturn=null;
