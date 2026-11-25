@@ -29,6 +29,10 @@ d'Aizenay. Toucher un match remplit l'équipe, l'adversaire (avec son logo), la 
 - Correspondance compétition → équipe du studio : fonction `teamFor` du script. Les logos
   adverses sont retrouvés par nom puis par numéro de club FFVB (champ `ffvb` dans `js/app.js`).
 
+Le même fichier contient aussi les **matchs à venir** (`aVenir`, exempts exclus) : le bouton
+**Planning** de la page Matchs en fait une image par jour du week-end (à domicile puis à
+l'extérieur), avec une description générée.
+
 Lancer le script à la main : `node scripts/resultats.mjs`.
 
 ## Lancer en local
