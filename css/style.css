@@ -293,3 +293,5 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .drow .sp{flex:1}
 .chk{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);font-weight:600;cursor:pointer}
 .chk input{width:20px;height:20px;min-height:0;margin:0;accent-color:var(--navy)}
+/* vue d'ensemble de la série : boutons en bas de page, pas collés à l'écran */
+#serStep2 .sernav{position:static;padding-top:16px}
