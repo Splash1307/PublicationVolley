@@ -319,3 +319,8 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .hcard small{font-size:15px;font-weight:400;opacity:.9}
 .hcard:hover{transform:translateY(-1px)}
 .homeblank{display:block;margin:6px auto 0}
+/* cadrage par défaut d'une photo d'équipe */
+button.frm{width:44px;padding:0;flex:none;font-size:20px;color:var(--sky)}
+.frmbar .row{margin:0;gap:8px}
+.frmbar button:not(.main){background:#fff;color:#112f49;min-height:38px}
+.frmbar .ghost{background:transparent!important;text-decoration:underline}

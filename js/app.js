@@ -44,16 +44,17 @@ let opps=[
 ].map(o=>({id:uid(),...o}));
 const SETTINGS=['venue'];
 const teamPhotos={};
+let teamFrames={}; // cadrage par défaut de la photo de chaque équipe : {z, fx, fy} (décalages relatifs)
 // photos d'équipe par défaut, dans le dépôt (assets/equipes) : utilisées si l'appareil n'a pas sa propre photo
 const TEAM_PHOTOS={'regionale masculine':'assets/equipes/regionale-masculine.jpg','departementale feminine 2':'assets/equipes/departementale-feminine-2.jpg','m18 masculine':'assets/equipes/m18-masculine.jpg','departementale masculine 3':'assets/equipes/departementale-masculine-3.jpg','m18 feminine':'assets/equipes/m18-feminine.jpg','m15 feminine':'assets/equipes/m15-feminine.jpg','departementale feminine 1':'assets/equipes/departementale-feminine-1.jpg','departementale masculine 2':'assets/equipes/departementale-masculine-2.jpg'};
 const teamPhoto=t=>t&&(teamPhotos[t.id]||TEAM_PHOTOS[norm(t.name).trim()]||null); // id -> dataURL (kept in IndexedDB)
 
 // ---------- storage ----------
-function store(){ try{ const o={}; SETTINGS.forEach(k=>o[k]=$(k).value); o.seed=SEED; o.logo=clubLogoData; o.teams=teams; o.opps=opps; o.team=$('team').value; o.oppId=oppId; localStorage.setItem('griffonsStudio4',JSON.stringify(o)); }catch(e){ toast('Stockage du navigateur plein'); } }
+function store(){ try{ const o={}; SETTINGS.forEach(k=>o[k]=$(k).value); o.seed=SEED; o.logo=clubLogoData; o.teams=teams; o.opps=opps; o.team=$('team').value; o.oppId=oppId; o.frames=teamFrames; localStorage.setItem('griffonsStudio4',JSON.stringify(o)); }catch(e){ toast('Stockage du navigateur plein'); } }
 function restore(){ try{
   let o=JSON.parse(localStorage.getItem('griffonsStudio4')||'null');
   const legacy=!o; if(legacy) o=JSON.parse(localStorage.getItem('griffonsStudio3')||'null'); if(!o) return null;
-  SETTINGS.forEach(k=>{ if(o[k]) $(k).value=o[k]; }); if(o.logo) clubLogoData=o.logo;
+  SETTINGS.forEach(k=>{ if(o[k]) $(k).value=o[k]; }); if(o.logo) clubLogoData=o.logo; if(o.frames) teamFrames=o.frames;
   const low=x=>String(x).trim().toLowerCase(), old=(o.seed||1)<SEED;
   if(Array.isArray(o.teams)){ const t=o.teams.map(x=>typeof x==='string'?{id:uid(),name:x}:x); const add=old?teams.filter(d=>!t.some(x=>low(x.name)===low(d.name))):[]; teams=t.concat(add); }
   if(Array.isArray(o.opps)){ const t=o.opps.map(x=>x.id?x:{id:uid(),...x}); if(legacy&&o.oppSel!=null&&t[+o.oppSel]) o.oppId=t[+o.oppSel].id; let add=[];
@@ -108,9 +109,9 @@ function contain(im,cx,cy,bw,bh){ const r=Math.min(bw/im.width,bh/im.height); ct
 const PHOTO_BOTTOM=980; // canvas y (4:5 layout): the photo is framed so its bottom sits just above the score plate
 const PHOTO_EXT=1120;   // the photo is still painted down to here, behind the plate and the waves
 function backdrop(){
-  if(photo){ if(photo!==adjPhoto){ adj={z:1,dx:0,dy:0}; adjPhoto=photo; }
-    // the photo fills the area above the score plate (PH), so nothing important hides behind it
-    const PH=PHOTO_BOTTOM+(H-1350);
+  if(photo){ const PH=PHOTO_BOTTOM+(H-1350); // the photo fills the area above the score plate (PH), so nothing important hides behind it
+    if(photo!==adjPhoto){ const f=photo!==matchPhoto&&teamFrames[curTeam().id]; // cadrage par défaut de l'équipe (réglages)
+      adj=f?{z:f.z,dx:f.fx*W,dy:f.fy*PH}:{z:1,dx:0,dy:0}; adjPhoto=photo; }
     ctx.fillStyle=C.navy2; ctx.fillRect(0,0,W,H);
     const r=Math.max(W/photo.width,PH/photo.height)*adj.z, w=photo.width*r, h=photo.height*r;
     const bx=(W-w)/2, by=Math.min(0,(PH-h)*.35);
@@ -222,7 +223,7 @@ function drawPicker(){ drawBtn(); const q=$('oppSearch').value; const list=sorte
   $('oppPick').innerHTML=list.map(o=>`<button type="button" role="option" data-id="${o.id}" aria-selected="${o.id===oppId}">${o.logo?`<img src="${o.logo}" alt="">`:'<span class="nologo">?</span>'}${esc(o.name||'(sans nom)')}</button>`).join('')
     +(list.length?'':'<div class="empty">Aucun club trouvé.</div>')+`<button type="button" role="option" data-id="__free" aria-selected="${oppId==='__free'}"><span class="nologo">+</span>Autre adversaire…</button>`;
   const sel=$('oppPick').querySelector('[aria-selected=true]'); if(sel){ const pk=$('oppPick'); if(sel.offsetTop<pk.scrollTop||sel.offsetTop+sel.offsetHeight>pk.scrollTop+pk.clientHeight) pk.scrollTop=sel.offsetTop-pk.clientHeight/2+sel.offsetHeight/2; } }
-function drawTeams(){ $('teamList').innerHTML=teams.map(t=>`<div class="item"><label class="pick ph" title="Photo par défaut">${teamPhoto(t)?`<img src="${teamPhoto(t)}" alt="">`:'photo'}<input type="file" accept="image/*" data-tphoto="${t.id}" aria-label="Photo par défaut de ${esc(t.name)}"></label><input type="text" data-t="${t.id}" value="${esc(t.name)}" aria-label="Nom de l'équipe">${teamPhotos[t.id]?`<button type="button" class="ghost sm" data-tpdel="${t.id}" aria-label="Retirer la photo">Retirer photo</button>`:''}<button type="button" class="del" data-tdel="${t.id}" aria-label="Supprimer l'équipe">✕</button></div>`).join('')||'<p class="small">Aucune équipe.</p>'; }
+function drawTeams(){ $('teamList').innerHTML=teams.map(t=>`<div class="item"><label class="pick ph" title="Photo par défaut">${teamPhoto(t)?`<img src="${teamPhoto(t)}" alt="">`:'photo'}<input type="file" accept="image/*" data-tphoto="${t.id}" aria-label="Photo par défaut de ${esc(t.name)}"></label><input type="text" data-t="${t.id}" value="${esc(t.name)}" aria-label="Nom de l'équipe">${teamPhoto(t)?`<button type="button" class="frm" data-tframe="${t.id}" title="Cadrer la photo sur les publications" aria-label="Cadrer la photo de ${esc(t.name)}">✎</button>`:''}${teamPhotos[t.id]?`<button type="button" class="ghost sm" data-tpdel="${t.id}" aria-label="Retirer la photo">Retirer photo</button>`:''}<button type="button" class="del" data-tdel="${t.id}" aria-label="Supprimer l'équipe">✕</button></div>`).join('')||'<p class="small">Aucune équipe.</p>'; }
 function drawClubs(){ const q=$('clubSearch').value; const list=sortedOpps().filter(o=>match(o,q));
   $('oppList').innerHTML=list.map(o=>`<div class="item"><label class="pick" title="Changer le logo">${o.logo?`<img src="${o.logo}" alt="">`:'logo'}<input type="file" accept="image/*" data-ologo="${o.id}" aria-label="Logo de ${esc(o.name)}"></label><input type="text" data-o="${o.id}" value="${esc(o.name)}" aria-label="Nom du club"><button type="button" class="del" data-odel="${o.id}" aria-label="Supprimer ${esc(o.name)}">✕</button></div>`).join('')||'<p class="small">Aucun club trouvé.</p>'; }
 
@@ -583,7 +584,7 @@ async function showItem(i){ series.i=i; const it=series.items[i];
   $('serDef').setAttribute('aria-pressed',!it.snap.matchPhoto); $('serImp').classList.toggle('on',!!it.snap.matchPhoto);
   $('serSkip').textContent=it.skip?'Reprendre ce match':'Ignorer ce match'; $('serStep1').classList.toggle('skipped',it.skip);
   $('serBackBtn').hidden=i===0; $('serNext').textContent=i===series.items.length-1?'Voir tout':'Suivant'; saveSeries(); }
-$('serDef').addEventListener('click',async()=>{ matchPhoto=null; adj={z:1,dx:0,dy:0}; await showItemRefresh(); });
+$('serDef').addEventListener('click',async()=>{ matchPhoto=null; adjPhoto=null; await render(); series.items[series.i].snap=takeSnap(); await showItem(series.i); });
 $('serFile').addEventListener('change',async e=>{ const f=e.target.files[0]; if(!f) return; matchPhoto=await img(await shrink(f,1920)); adj={z:1,dx:0,dy:0}; e.target.value=''; await showItemRefresh(); });
 async function showItemRefresh(){ const it=series.items[series.i]; adjPhoto=await currentPhoto(); it.snap=takeSnap(); await showItem(series.i); }
 $('serSkip').addEventListener('click',()=>{ const it=series.items[series.i]; it.skip=!it.skip; if(it.skip&&series.i<series.items.length-1) showItem(series.i+1); else showItem(series.i); });
@@ -723,6 +724,23 @@ async function planZip(files){ if(files.length===1){ saveBlob(files[0]); return;
   const z=[]; for(const f of files) z.push({name:f.name,data:new Uint8Array(await f.arrayBuffer())});
   const u=URL.createObjectURL(zipStore(z)); const a=document.createElement('a'); a.href=u; a.download=`planning-${plan.weeks[plan.w].key}.zip`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),8000); toast(`${files.length} visuels téléchargés (.zip)`); }
 function saveBlob(file){ const u=URL.createObjectURL(file); const a=document.createElement('a'); a.href=u; a.download=file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); }
+
+// ---------- cadrage par défaut des photos d'équipe ----------
+// ✎ dans Réglages › Équipes : le studio affiche la photo de l'équipe, on la déplace / zoome, puis « Enregistrer ».
+let framing=null; // {teamId, snap}
+$('teamList').addEventListener('click',async e=>{ const id=e.target.dataset.tframe; if(!id) return;
+  framing={teamId:id, snap:takeSnap(), seriesBar:!$('serBar').hidden}; openSettings(false); $('serBar').hidden=true;
+  $('team').value=id; matchPhoto=null; texts=[]; activeText=null; drawTextList(); sync(); adjPhoto=null; await render();
+  $('frmName').textContent=curTeam().name; $('frmBar').hidden=false; setAdjust(true); window.scrollTo({top:0,behavior:'smooth'}); });
+async function endFraming(save){ if(!framing) return;
+  if(save){ const PH=PHOTO_BOTTOM+(H-1350); teamFrames[framing.teamId]={z:adj.z,fx:adj.dx/W,fy:adj.dy/PH}; store(); toast('Cadrage enregistré pour '+(teams.find(t=>t.id===framing.teamId)||{}).name); }
+  const f=framing; framing=null; $('frmBar').hidden=true; setAdjust(false);
+  await restoreSnap(f.snap); if(save&&!f.snap.matchPhoto&&f.snap.team===f.teamId) adjPhoto=null; // même équipe : on applique le nouveau cadrage
+  await render();
+  $('serBar').hidden=!f.seriesBar; openSettings(true); document.querySelector('[data-tab=teams]').click(); }
+$('frmSave').addEventListener('click',()=>endFraming(true));
+$('frmCancel').addEventListener('click',()=>endFraming(false));
+$('frmReset').addEventListener('click',()=>{ adj={z:1,dx:0,dy:0}; render(); });
 
 // ---------- settings sheet ----------
 let setReturn=null;
