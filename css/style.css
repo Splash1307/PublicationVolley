@@ -278,3 +278,9 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .serphoto #serSkip{margin-left:auto}
 #serStep1,#serStep2{padding-bottom:8px}
 @media(max-width:480px){.serprev{max-height:46vh}.serinfo b{font-size:20px}}
+/* série en cours (page Matchs) */
+.resume{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;margin:8px 0 4px;padding:10px 12px;border-radius:12px;background:var(--yel);color:#112f49;font-weight:600}
+.resume .row{margin:0;gap:6px}
+.resume .ghost{color:#112f49}
+.resume .main{background:var(--navy);border-color:var(--navy);color:#fff;min-height:38px}
+#serDrop{display:block;margin:4px 0 0}
