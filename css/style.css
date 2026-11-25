@@ -306,3 +306,16 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .plimg img{width:100%;display:block;border-radius:8px}
 .plimg figcaption{font-size:13px;font-weight:600;color:var(--mute);padding:6px 4px 2px;text-transform:capitalize}
 .sernav.pl{position:static;padding-top:16px}
+
+/* accueil */
+.homeq{font:700 24px 'Barlow Condensed',sans-serif;margin:10px 0 16px}
+.hcard{display:flex;align-items:center;gap:18px;width:100%;margin-bottom:14px;padding:22px 20px;border-radius:18px;text-align:left;border:0;color:#fff;box-shadow:0 14px 30px -16px rgba(0,0,0,.6)}
+.hcard.hres{background:linear-gradient(135deg,var(--navy),#1f5277)}
+.hcard.plan{background:linear-gradient(135deg,#2b8fb0,var(--sky))}
+.hcard svg{flex:none;color:var(--yel)}
+.hcard.plan svg{color:#fff}
+.hcard span{display:flex;flex-direction:column;gap:4px}
+.hcard b{font:400 34px/1 Anton,Impact,sans-serif;letter-spacing:.01em}
+.hcard small{font-size:15px;font-weight:400;opacity:.9}
+.hcard:hover{transform:translateY(-1px)}
+.homeblank{display:block;margin:6px auto 0}

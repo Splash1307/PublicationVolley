@@ -736,7 +736,14 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()
 $('lockNow').addEventListener('click',()=>{ try{ localStorage.removeItem('griffonsUnlock'); }catch(e){} location.reload(); });
 
 const saved=restore(); fillTeams(saved&&saved.team); oppId=(saved&&saved.oppId)||null; if(oppId!=='__free'&&!opps.some(o=>o.id===oppId)) oppId=(sortedOpps()[0]||{}).id||null; drawPicker(); drawTeams(); drawClubs(); sync();
-openResults(true); // l'appli s'ouvre sur la page Matchs
+// ---------- accueil : choisir Résultats ou Planning (après le code d'accès) ----------
+function openHome(v){ $('accueil').hidden=!v; document.body.classList.toggle('noscroll',v); }
+$('homeRes').addEventListener('click',()=>{ openHome(false); openResults(true); });
+$('homePlan').addEventListener('click',()=>{ openHome(false); openPlanning(); });
+$('homeBlank').addEventListener('click',()=>{ openHome(false); newBlank(); });
+$('homeClose').addEventListener('click',()=>openHome(false));
+$('hdrLogo').addEventListener('click',()=>openHome(true)); $('hdrLogo').style.cursor='pointer'; $('hdrLogo').title='Accueil';
+openHome(true); // l'appli s'ouvre sur l'accueil
 (async()=>{ const all=await idb.all(); for(const k in all) if(!k.startsWith('__')) teamPhotos[k]=all[k]; drawResume(); drawTeams(); await loadClubLogo(); await loadOpp(); render();
   try{ await Promise.all([document.fonts.load('100px Anton'),document.fonts.load("600 40px 'Barlow Condensed'")]); }catch(e){} render(); })();
 }
