@@ -248,3 +248,6 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .msedit,.msedit::after{display:none!important}
 .msum{cursor:pointer}
 @media(hover:hover){.msum:hover .mstext b{text-decoration:underline}}
+/* calque des cadres d'édition (pointillés, poignée) au-dessus de l'aperçu */
+#ov{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.frame.blocked #ov{display:none}
