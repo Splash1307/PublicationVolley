@@ -4,6 +4,9 @@ const C={yel:'#f1bf48',sky:'#58b6d3',navy:'#112f49',navy2:'#0f2d46',white:'#fff'
 const $=id=>document.getElementById(id);
 const W=1080;
 const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
+const ov=document.getElementById('ov'), ox=ov.getContext('2d'); // calque des cadres d'édition, au-dessus de l'aperçu
+let lastBlob=null; // image propre du dernier rendu, prête à enregistrer / partager tout de suite
+const dataUrlBlob=u=>{ const [h,d]=u.split(','), bin=atob(d), a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:h.slice(5,h.indexOf(';'))}); };
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
 const SEED=10;
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -167,7 +170,7 @@ function oppMark(){
 function infoLines(o,lines,size){ ctx.save(); ctx.translate(0,o); ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.shadowColor='rgba(0,0,0,.3)'; ctx.shadowBlur=6;
   lines.forEach((t,i)=>{ const s=fit(ctx,t,390,size,'Anton'); ctx.font=`${s}px Anton`; ctx.fillText(t,672,1194+i*(size+4)); }); ctx.restore(); }
 
-let photo=null, adj={z:1,dx:0,dy:0}, adjPhoto=null, texts=[], textBoxes=[], exporting=false;
+let photo=null, adj={z:1,dx:0,dy:0}, adjPhoto=null, texts=[], textBoxes=[];
 async function render(){
   photo=await currentPhoto(); photoInfo(); if(!photo&&adjusting){ adjusting=false; } syncMoveUI();
   cv.width=W; cv.height=H; const o=H-1350, top=H===1920?150:0;
@@ -190,8 +193,8 @@ async function render(){
     const home=$('home').value==='1'; const d=frDate($('date').value).toUpperCase();
     infoLines(o,[d,frTime($('time').value).toUpperCase()+(home?' · DOMICILE':' · EXTÉRIEUR'),(home?$('venue').value:($('awayVenue').value||'')).toUpperCase()].filter(Boolean),46);
   }
-  drawTexts(); drawSummary();
-  try{ $('out').src=cv.toDataURL('image/jpeg',.93); }
+  ov.width=W; ov.height=H; drawTexts(); drawSummary();
+  try{ const url=cv.toDataURL('image/jpeg',.93); $('out').src=url; lastBlob=dataUrlBlob(url); }
   catch(e){ toast('Ouvre le studio via un serveur web (voir README), pas en double-cliquant le fichier.'); }
 }
 
@@ -257,8 +260,20 @@ let downloads=null;
 if(window.claude&&window.claude.use){ window.claude.use('downloads').then(d=>{ downloads=d; if(d) $('dl').hidden=false; }).catch(()=>{}); }
 else { $('dl').hidden=false; } // standalone page: plain browser download
 const fname=()=>`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`;
-$('dl').addEventListener('click',()=>{ if(!exporting&&(adjusting||activeText)){ exporting=true; render().then(()=>{ $('dl').click(); }); return; } if(scoreBlocked()){ exporting=false; render(); toast('Corrige le score avant de télécharger'); setGrid.scrollIntoView({behavior:'smooth',block:'center'}); return; } if(!downloads){ cv.toBlob(blob=>{ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); },'image/jpeg',.93); afterExport(); return; } cv.toBlob(async blob=>{ try{ await downloads.save({filename:`${kind==='match'?'jour-de-match':'resultat'}-${slug(curOpp().name)}-${$('date').value}.jpg`,data:blob}); toast('Image enregistrée'); }catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } $('dl').hidden=true; toast('Téléchargement indisponible ici : appui long sur l\'image'); } },'image/jpeg',.93); afterExport(); });
-function afterExport(){ if(exporting){ exporting=false; render(); } }
+// Sur téléphone : menu de partage du téléphone (« Enregistrer l'image » → Photos, Instagram, WhatsApp…).
+// Un simple téléchargement irait dans l'app Fichiers. Sur ordinateur : téléchargement classique.
+// navigator.share doit être appelé tout de suite après le toucher : on utilise l'image déjà prête (lastBlob).
+const isTouch=()=>matchMedia('(pointer:coarse)').matches;
+function saveFile(blob){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); }
+$('dl').addEventListener('click',()=>{
+  if(scoreBlocked()){ toast('Corrige le score avant de télécharger'); openMatch(true); setGrid.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+  if(!lastBlob) return;
+  const file=new File([lastBlob],fname(),{type:'image/jpeg'});
+  if(isTouch()&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file]}).catch(e=>{ if(e&&e.name==='AbortError') return; saveFile(file); toast('Image téléchargée (app Fichiers)'); }); return; }
+  if(downloads){ downloads.save({filename:fname(),data:lastBlob}).then(()=>toast('Image enregistrée')).catch(e=>{ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast('Patiente un instant puis réessaie'); return; } saveFile(lastBlob); }); return; }
+  saveFile(lastBlob); });
+if(isTouch()&&navigator.canShare) $('dl').textContent='Enregistrer / partager';
 
 // ---------- résumé du match (bloc replié) ----------
 // Équipe, adversaire, date et score tiennent sur une ligne ; « Modifier » déplie le détail.
@@ -360,8 +375,8 @@ function drawTexts(){ textBoxes=[];
         ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=14; ctx.shadowOffsetY=3; ctx.fillText(l,t.x,base); ctx.restore(); }
       else grunge(l,t.x,base,size,'center',W-60,t.color); });
     const b={id:t.id,x:t.x-mw/2-24,y:y0-lh/2-16,w:mw+48,h:lines.length*lh+32}; b.hx=Math.min(b.x+b.w,W-HANDLE_R-6); b.hy=Math.min(b.y+b.h,H-HANDLE_R-6); textBoxes.push(b);
-    // dashed frame on the preview only (export re-renders without it)
-    if(!exporting&&(adjusting||t.id===activeText)){ ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=5; ctx.strokeStyle=t.id===activeText?C.yel:'rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h);
+    // dashed frame: drawn on the overlay canvas (#ov) above the preview, never in the image itself
+    if(adjusting||t.id===activeText){ const ctx=ox; ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=5; ctx.strokeStyle=t.id===activeText?C.yel:'rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h);
       if(t.id===activeText){ // resize handle, bottom-right corner
         ctx.setLineDash([]); ctx.fillStyle=C.yel; ctx.strokeStyle=C.navy; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(b.hx,b.hy,HANDLE_R,0,7); ctx.fill(); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(b.hx-11,b.hy+11); ctx.lineTo(b.hx+11,b.hy-11); ctx.moveTo(b.hx+3,b.hy-11); ctx.lineTo(b.hx+11,b.hy-11); ctx.lineTo(b.hx+11,b.hy-3);
