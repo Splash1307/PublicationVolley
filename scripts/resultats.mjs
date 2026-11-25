@@ -42,7 +42,7 @@ export function teamFor(poule, name) {
   return null;
 }
 
-export function parseExport(csv) {
+export function parseExport(csv, { upcoming = false } = {}) {
   const lines = csv.split(/\r?\n/).filter(l => l.trim());
   const head = lines.shift().split(';').map(s => s.trim());
   const col = k => head.indexOf(k);
@@ -54,8 +54,17 @@ export function parseExport(csv) {
     const v = k => c[col(k)] || '';
     const aIs = v('EQA_no') === CLUB, bIs = v('EQB_no') === CLUB;
     if (!aIs && !bIs) continue;
-    const set = v('Set');
-    if (!/^\w\/\w$/.test(set)) continue; // pas encore joué (ou résultat pas saisi)
+    const set = v('Set'), played = /^\w\/\w$/.test(set);
+    if (upcoming) { // matchs à venir : pas de score ; on ignore les exempts et les adversaires pas encore connus
+      if (played) continue;
+      const oppNo = aIs ? v('EQB_no') : v('EQA_no'), oppNom = aIs ? v('EQB_nom') : v('EQA_nom');
+      if (!oppNo || /^x+$/i.test(oppNom) || !v('Date')) continue;
+      const code = v('Match');
+      out.push({ code, entite: v('Entité'), poule: code.slice(0, 3), date: v('Date'), heure: v('Heure'), domicile: aIs,
+        aizenay: aIs ? v('EQA_nom') : v('EQB_nom'), adversaire: oppNom, adversaireClub: oppNo, salle: v('Salle') });
+      continue;
+    }
+    if (!played) continue; // pas encore joué (ou résultat pas saisi)
     let [sa, sb] = set.split('/');
     let sets = v('Score').split(',').map(s => s.split('-').map(Number)).filter(p => p.length === 2 && p.every(Number.isFinite));
     const home = aIs; // si les deux équipes sont d'Aizenay, on prend l'équipe A
@@ -97,7 +106,9 @@ async function main() {
       body: new URLSearchParams({ cnclub: CLUB, cal_saison: saison, typ_edition: 'E', type: 'RES' }),
     });
     const matchs = parseExport(csv);
-    const lab = await labels(matchs, saison);
+    const today = new Date().toISOString().slice(0, 10);
+    const aVenir = parseExport(csv, { upcoming: true }).filter(m => m.date >= today);
+    const lab = await labels([...matchs, ...aVenir], saison);
     const seen = new Set();
     data = {
       maj: new Date().toISOString(), saison, source: 'FFVB - Gestion Sportive',
@@ -105,8 +116,12 @@ async function main() {
         .filter(m => !seen.has(m.code) && seen.add(m.code)) // pas de doublon
         .map(m => ({ ...m, competition: lab[`${m.entite}|${m.poule}`] || m.poule, equipe: teamFor(m.poule, m.aizenay) }))
         .sort((a, b) => (b.date + b.heure).localeCompare(a.date + a.heure)),
+      // matchs à venir (planning du week-end), du plus proche au plus lointain
+      aVenir: aVenir
+        .map(m => ({ ...m, competition: lab[`${m.entite}|${m.poule}`] || m.poule, equipe: teamFor(m.poule, m.aizenay) }))
+        .sort((a, b) => (a.date + a.heure).localeCompare(b.date + b.heure)),
     };
-    console.log(`FFVB ${saison} : ${data.matchs.length} matchs terminés.`);
+    console.log(`FFVB ${saison} : ${data.matchs.length} matchs terminés, ${data.aVenir.length} à venir.`);
   } catch (e) {
     console.warn('::warning::Récupération FFVB impossible :', e.message);
     try { // on republie le dernier fichier en ligne, sinon on garde celui du dépôt

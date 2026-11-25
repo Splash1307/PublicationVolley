@@ -24,7 +24,7 @@
 
   // « face à Les Sables » → « face aux Sables », « contre Les Sables » → « contre les Sables »
   const fa = o => /^les\s/i.test(o) ? 'aux ' + o.slice(4) : /^le\s/i.test(o) ? 'au ' + o.slice(3) : 'à ' + o;
-  const ct = o => o.replace(/^(les|le|la)\s/i, w => w.toLowerCase());
+  const ct = o => o.replace(/^(les|le)\s/i, w => w.toLowerCase());
 
   // une ligne par match : « 🏐 M18 Féminine : victoire 3-0 contre Luçon ! 💪 »
   function matchLine(m, r, single) {
@@ -89,5 +89,28 @@
     return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
   }
 
-  window.Description = { caption };
+  // description du planning d'un week-end : matchs à domicile puis à l'extérieur
+  // entrée : [{team, opp, date, heure, home, salle, cup}]
+  function planning(list, opt = {}) {
+    const r = rng(opt.seed || 1), out = [];
+    if (!list.length) return '';
+    const hh = h => (h || '').replace(':', 'h').replace(/h00$/, 'h');
+    const day = d => { const x = new Date(d + 'T12:00'); return JOURS[x.getDay()].replace(/^./, c => c.toUpperCase()); };
+    const multi = new Set(list.map(m => m.date)).size > 1;
+    const line = m => `• ${multi ? day(m.date) + ' ' : ''}${hh(m.heure)} · ${m.team} ${m.home ? 'vs' : 'chez'} ${m.home ? m.opp : ct(m.opp)}${m.cup ? ' (' + m.cup + ')' : ''}`;
+    const home = list.filter(m => m.home), away = list.filter(m => !m.home);
+    out.push(pick(r, ['📅 LE PLANNING DU WEEK-END 📅', '🏐 LE PROGRAMME DU WEEK-END 🏐', `📅 Planning du week-end ${weekendText(list.map(m => m.date))} 📅`]));
+    out.push('');
+    out.push(pick(r, ['Un nouveau week-end de compétition s\'annonce pour nos Griffons ! 💪', 'Voici le programme de nos équipes ce week-end ! 🏐', 'Nos Griffons sont prêts pour un nouveau week-end de matchs ! 💪🏐']));
+    if (home.length) { const salles = [...new Set(home.map(m => m.salle).filter(Boolean))];
+      out.push(''); out.push(`🏠 À DOMICILE${salles.length === 1 ? ' · ' + salles[0] : ''}`); home.forEach(m => out.push(line(m))); }
+    if (away.length) { out.push(''); out.push('🚌 À L\'EXTÉRIEUR'); away.forEach(m => out.push(line(m))); }
+    out.push('');
+    out.push(home.length ? pick(r, ['Venez nombreux nous encourager à la salle Omega ! 💙💛', 'On compte sur vous pour remplir les tribunes de la salle Omega ! 💙💛', 'Venez nombreux soutenir nos équipes à domicile ! 📣💙💛'])
+      : pick(r, ['Bonne route et bons matchs à toutes nos équipes ! 💙💛', 'Bons matchs à nos Griffons qui jouent à l\'extérieur ! 💪💙💛']));
+    if (opt.tags) { out.push(''); out.push(TAGS); }
+    return out.join('\n');
+  }
+
+  window.Description = { caption, planning };
 })();

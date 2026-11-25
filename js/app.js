@@ -632,6 +632,93 @@ function zipStore(files){ const enc=new TextEncoder(), parts=[], central=[]; let
   return new Blob([...parts,...central,e],{type:'application/zip'}); }
 $('serStart').addEventListener('click',startSeries);
 
+// ---------- planning du week-end ----------
+// Matchs à venir (data/resultats.json → aVenir) : une image par jour, matchs à domicile puis à l'extérieur.
+// Même charte que les visuels de résultat (fond, titres usés, plaques, vagues), sans photo.
+let plan=null; // {weeks:[{key,days:[{date,matches}]}], w, imgs:[{date,url,blob}], seed}
+const JOUR=['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'], MOISU=['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
+// un match du lundi au samedi va avec le samedi qui suit, un match du dimanche avec la veille
+const planWeekend=d=>{ const x=new Date(d+'T12:00'), k=x.getDay(); x.setDate(x.getDate()+(k===0?-1:6-k)); return x.toISOString().slice(0,10); };
+const hh=h=>(h||'').replace(':','H');
+function planMatch(m){ const o=findOpp(m), cup=isCup(m)?cupLabel(m):'';
+  const num=(m.adversaire.match(/\s(\d)\s*(\(.*\))?$/)||[])[1]; // « LES SABLES VOLLEY VENDEE 2 », « LA ROCHE 4 (Dép) » : on garde le n° d'équipe
+  const opp=o?o.name+(num&&!o.name.endsWith(' '+num)?' '+num:''):cap(m.adversaire);
+  return {...m, team:m.equipe||cap(m.aizenay), opp, logo:o&&o.logo, cup, salleC:cap(m.salle)}; }
+function buildWeeks(){ const today=new Date().toISOString().slice(0,10), weeks=[];
+  (results.aVenir||[]).filter(m=>m.date>=today).forEach(m=>{ const k=planWeekend(m.date); let w=weeks.find(x=>x.key===k); if(!w) weeks.push(w={key:k,days:[]});
+    let d=w.days.find(x=>x.date===m.date); if(!d) w.days.push(d={date:m.date,matches:[]}); d.matches.push(planMatch(m)); });
+  weeks.forEach(w=>{ w.days.sort((a,b)=>a.date.localeCompare(b.date)); w.days.forEach(d=>d.matches.sort((a,b)=>a.heure.localeCompare(b.heure))); });
+  return weeks.sort((a,b)=>a.key.localeCompare(b.key)); }
+function txtA(t,x,y,size,color,align='left',maxW=9999){ ctx.save(); ctx.fillStyle=color; ctx.textAlign=align; const s=fit(ctx,t,maxW,size,'Anton'); ctx.font=`${s}px Anton`; ctx.fillText(t,x,y); ctx.restore(); }
+function txtB(t,x,y,size,color,align='left',maxW=9999){ ctx.save(); ctx.fillStyle=color; ctx.textAlign=align; let s=size; do{ ctx.font=`600 ${s}px Barlow`; if(ctx.measureText(t).width<=maxW) break; s-=1; }while(s>12); ctx.fillText(t,x,y); ctx.restore(); }
+function hexFill(P,color,shadow){ ctx.save(); if(shadow){ ctx.shadowColor='rgba(0,0,0,.3)'; ctx.shadowBlur=16; ctx.shadowOffsetY=5; } ctx.fillStyle=color; ctx.beginPath(); P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function platePath(y,h,x0=60,x1=1020){ const t=h*.42; return [[x0,y+h/2],[x0+t,y],[x1-t,y],[x1,y+h/2],[x1-t,y+h],[x0+t,y+h]]; }
+function drawDay(day,imgs){ const W2=W; cv.width=W2; cv.height=1350;
+  // fond du visuel résultat sans photo
+  const g=ctx.createLinearGradient(0,0,0,1350); g.addColorStop(0,'#2c6f93'); g.addColorStop(1,'#123049'); ctx.fillStyle=g; ctx.fillRect(0,0,W,1350);
+  ctx.save(); ctx.globalAlpha=.08; ctx.strokeStyle='#fff'; ctx.lineWidth=3; for(let i=-1350;i<W;i+=60){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+675,1350); ctx.stroke(); } ctx.restore();
+  const t=ctx.createLinearGradient(0,0,0,300); t.addColorStop(0,'rgba(0,0,0,.35)'); t.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=t; ctx.fillRect(0,0,W,300);
+  waves(0);
+  const x=new Date(day.date+'T12:00');
+  grunge(dmy(day.date),W-22,64,56,'right',360);
+  grunge('PLANNING',W/2,186,120,'center',900);
+  grunge(`${JOUR[x.getDay()]} ${x.getDate()} ${MOISU[x.getMonth()]}`,W/2,262,56,'center',800,C.yel);
+  ctx.fillStyle='#fff'; ctx.fillRect(417,300,242,6); ctx.fillRect(384,321,310,6);
+  // blocs : à domicile puis à l'extérieur
+  const home=day.matches.filter(m=>m.domicile), away=day.matches.filter(m=>!m.domicile), groups=[[home,true],[away,false]].filter(g=>g[0].length);
+  const n=day.matches.length, heads=groups.length*78, gap=n>5?14:22, room=1240-360-heads-groups.length*16;
+  const h=Math.max(78,Math.min(n<=2?170:130,Math.floor((room-gap*(n-1))/n))), k=h/120;
+  let y=360+Math.max(0,(room-(n*h+gap*(n-1)))/(n<=2?2:3));
+  groups.forEach(([list,isHome])=>{ const salles=[...new Set(list.map(m=>m.salleC).filter(Boolean))];
+    const title=isHome?'À DOMICILE'+(salles.length===1?' · '+salles[0].toUpperCase():''):'À L’EXTÉRIEUR';
+    hexFill([[60,y+29],[86,y],[700,y],[726,y+29],[700,y+58],[86,y+58]],isHome?C.yel:C.sky,true);
+    txtA(title,104,y+44,34,isHome?C.navy:'#fff','left',580); y+=78;
+    list.forEach(m=>{ const cy=y+h/2; plateDraw(platePath(y,h));
+      txtA(hh(m.heure),110,cy+24*k,Math.round(64*k),C.navy,'left',200*k);
+      const tx=110+Math.max(190,215*k);
+      txtA(m.team.toUpperCase(),tx,cy-4*k-(m.cup?6:0),Math.round(36*k),C.navy,'left',820-tx);
+      const sub=(m.domicile?'vs ':'chez ')+m.opp+(!m.domicile||salles.length!==1?'  ·  '+m.salleC:'');
+      txtB(sub,tx,cy+28*k-(m.cup?6:0),Math.round(23*k),'#5a6774','left',820-tx);
+      if(m.cup) txtB('🏆 '+m.cup,tx,cy+28*k+Math.round(22*k),Math.round(19*k),'#c58f12','left',820-tx);
+      if(m.logo&&imgs[m.logo]) contain(imgs[m.logo],915,cy,100*k,88*k);
+      y+=h+gap; });
+    y+=16; });
+  grunge('ALLEZ LES GRIFFONS !',W-24,1300,52,'right',380);
+  const url=cv.toDataURL('image/jpeg',.93); return {date:day.date,url,blob:dataUrlBlob(url)}; }
+function plateDraw(P){ ctx.save(); ctx.shadowColor='rgba(0,0,0,.25)'; ctx.shadowBlur=16; ctx.shadowOffsetY=5; ctx.beginPath(); P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill(); ctx.restore();
+  const g=ctx.createLinearGradient(P[0][0],P[1][1],P[3][0],P[4][1]); g.addColorStop(0,C.sky); g.addColorStop(.45,'#9fdcef'); g.addColorStop(.55,C.yel); g.addColorStop(1,C.yel);
+  ctx.save(); ctx.lineWidth=7; ctx.strokeStyle=g; ctx.lineJoin='miter'; ctx.beginPath(); P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.stroke(); ctx.restore(); }
+async function drawPlanning(){ const w=plan.weeks[plan.w]; $('plWeek').textContent=w?wkLabel(w.key):'Aucun match à venir';
+  $('plPrev').disabled=plan.w<=0; $('plNext').disabled=plan.w>=plan.weeks.length-1;
+  if(!w){ $('plGrid').innerHTML='<p class="small">Aucun match à venir pour le moment.</p>'; $('plAll').disabled=true; $('plText').value=''; return; }
+  $('plGrid').innerHTML='<p class="small">Préparation des visuels…</p>';
+  const logos={}; for(const d of w.days) for(const m of d.matches) if(m.logo&&!logos[m.logo]) logos[m.logo]=await img(m.logo);
+  const savedH=H; plan.imgs=w.days.map(d=>drawDay(d,logos)); H=savedH; render(); // le studio retrouve son visuel
+  $('plGrid').innerHTML=plan.imgs.map((im,i)=>`<figure class="plimg"><img src="${im.url}" alt="Planning du ${dmy(im.date)}"><figcaption>${JOUR[new Date(im.date+'T12:00').getDay()].toLowerCase()} · ${w.days[i].matches.length} match${w.days[i].matches.length>1?'s':''}</figcaption></figure>`).join('');
+  $('plAll').disabled=false; $('plAll').textContent=plan.imgs.length>1?`Tout télécharger (${plan.imgs.length})`:'Télécharger';
+  regenPlanDesc(); }
+function regenPlanDesc(){ const w=plan.weeks[plan.w]; if(!w) return;
+  const list=w.days.flatMap(d=>d.matches).map(m=>({team:m.team,opp:m.opp,date:m.date,heure:m.heure,home:m.domicile,salle:m.salleC,cup:m.cup}));
+  $('plText').value=Description.planning(list,{seed:plan.seed,tags:$('plTags').checked}); }
+async function openPlanning(){ if(!results) await loadResults();
+  plan={weeks:buildWeeks(),w:0,imgs:[],seed:1}; openResults(false);
+  $('planning').hidden=false; document.body.classList.add('noscroll'); await drawPlanning(); }
+$('plStart').addEventListener('click',openPlanning);
+$('plClose').addEventListener('click',()=>{ $('planning').hidden=true; document.body.classList.remove('noscroll'); });
+$('plPrev').addEventListener('click',()=>{ if(plan.w>0){ plan.w--; drawPlanning(); } });
+$('plNext').addEventListener('click',()=>{ if(plan.w<plan.weeks.length-1){ plan.w++; drawPlanning(); } });
+$('plAgain').addEventListener('click',()=>{ plan.seed++; regenPlanDesc(); });
+$('plTags').addEventListener('change',regenPlanDesc);
+$('plCopy').addEventListener('click',()=>{ if($('plText').value.trim()) copyText($('plText').value); });
+$('plAll').addEventListener('click',()=>{ if(!plan||!plan.imgs.length) return; copyForShare($('plText').value);
+  const files=plan.imgs.map(im=>new File([im.blob],`planning-${slug(JOUR[new Date(im.date+'T12:00').getDay()])}-${im.date}.jpg`,{type:'image/jpeg'}));
+  if(isTouch()&&navigator.canShare&&navigator.canShare({files})){ navigator.share({files}).catch(e=>{ if(e&&e.name==='AbortError') return; planZip(files); }); return; }
+  planZip(files); });
+async function planZip(files){ if(files.length===1){ saveBlob(files[0]); return; }
+  const z=[]; for(const f of files) z.push({name:f.name,data:new Uint8Array(await f.arrayBuffer())});
+  const u=URL.createObjectURL(zipStore(z)); const a=document.createElement('a'); a.href=u; a.download=`planning-${plan.weeks[plan.w].key}.zip`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),8000); toast(`${files.length} visuels téléchargés (.zip)`); }
+function saveBlob(file){ const u=URL.createObjectURL(file); const a=document.createElement('a'); a.href=u; a.download=file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); }
+
 // ---------- settings sheet ----------
 let setReturn=null;
 function openSettings(v){ const sh=$('settings'); sh.hidden=!v; document.body.classList.toggle('noscroll',v);

@@ -295,3 +295,14 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .chk input{width:20px;height:20px;min-height:0;margin:0;accent-color:var(--navy)}
 /* vue d'ensemble de la série : boutons en bas de page, pas collés à l'écran */
 #serStep2 .sernav{position:static;padding-top:16px}
+
+/* planning du week-end */
+.plbtn{background:var(--sky);border-color:var(--sky);color:#fff}
+.plnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 12px}
+.plnav b{font:700 20px 'Barlow Condensed',sans-serif;text-align:center;flex:1}
+.plnav button{width:44px;padding:0;font-size:26px}
+.plgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.plimg{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px}
+.plimg img{width:100%;display:block;border-radius:8px}
+.plimg figcaption{font-size:13px;font-weight:600;color:var(--mute);padding:6px 4px 2px;text-transform:capitalize}
+.sernav.pl{position:static;padding-top:16px}
