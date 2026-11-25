@@ -461,7 +461,9 @@ function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p 
     </button>`; }).join('')).join('');
   $('resMore').hidden=groups.length<=many; }
 // remplit le studio avec un match FFVB (sans rendu ni interface)
+let curMatch=null; // dernier match FFVB importé dans le studio
 function fillFromMatch(m){
+  curMatch=m;
   kind='result'; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.kind==='result'));
   const t=m.equipe&&teams.find(x=>norm(x.name)===norm(m.equipe));
   if(t) $('team').value=t.id;
@@ -472,7 +474,7 @@ function fillFromMatch(m){
   for(let i=0;i<5;i++){ const st=m.sets[i]; cell(i,0).value=st?st[0]:''; cell(i,1).value=st?st[1]:''; }
   drawBtn(); drawPicker(); sync(); store(); syncSets(true); return t; }
 function applyResult(m){
-  const t=fillFromMatch(m); loadOpp().then(render);
+  const t=fillFromMatch(m); loadOpp().then(render); dSeed++; regenDesc();
   openResults(false);
   toast(t?`${t.name} · match importé`:'Match importé : choisis l\'équipe');
   if(!t) $('team').focus(); }
@@ -490,12 +492,26 @@ function newBlank(){
   matchPhoto=null; $('photo').value=''; oppId=null; $('opp').value='';
   $('date').value=new Date().toISOString().slice(0,10); $('cupLabel').value='';
   for(let i=0;i<5;i++){ cell(i,0).value=''; cell(i,1).value=''; }
-  texts=[]; activeText=null; adjusting=false; drawTextList();
+  texts=[]; activeText=null; adjusting=false; drawTextList(); curMatch=null; $('dText').value='';
   drawBtn(); drawPicker(); sync(); store(); setBestOf(5); openMatch(true); loadOpp().then(render);
   openResults(false); toast('Nouvelle publication : remplis le match'); }
 $('newBlank').addEventListener('click',newBlank);
 ['fTeam','fWeek','fComp'].forEach(id=>$(id).addEventListener('change',drawResults));
 $('resList').addEventListener('click',e=>{ const b=e.target.closest('.res'); if(!b) return; const m=results.matchs.find(x=>x.code===b.dataset.code); if(m) applyResult(m); });
+
+// ---------- description Instagram ----------
+// js/description.js écrit le texte (modèles inspirés des posts du club) ; ici on lui donne les matchs.
+function descMatch({team,opp,sets,m,cup,date}){ let a=0,b=0; sets.forEach(([x,y])=>x>y?a++:b++);
+  let win=a>b; const forfait=!!(m&&m.forfait); if(forfait) win=m.score[0]!=='F'&&m.score[0]!=='P';
+  return {team,opp,a,b,win,forfait,derby:!!(m&&m.adversaireClub==='0856001'),cup:cup||'',sets,date}; }
+function studioMatch(){ return descMatch({team:curTeam().name||'nos Griffons',opp:curOpp().name||'l\'adversaire',sets:parseSets($('sets').value),
+  m:curMatch&&curMatch.date===$('date').value?curMatch:null,cup:$('cupLabel').value.trim(),date:$('date').value}); }
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); }catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(_){} ta.remove(); } toast('Description copiée : colle-la dans Instagram'); }
+let dSeed=1;
+function regenDesc(){ const m=studioMatch(); $('dText').value=m.sets.length?Description.caption([m],{seed:dSeed,tags:$('dTags').checked}):''; }
+$('dAgain').addEventListener('click',()=>{ dSeed++; regenDesc(); if(!$('dText').value) toast('Remplis d\'abord le score du match'); });
+$('dTags').addEventListener('change',regenDesc);
+$('dCopy').addEventListener('click',()=>{ if(!$('dText').value.trim()) regenDesc(); if($('dText').value.trim()) copyText($('dText').value); else toast('Remplis d\'abord le score du match'); });
 
 // ---------- série du week-end ----------
 // « Tout le week-end » : photo match par match (Suivant), puis vue d'ensemble (post / story),
@@ -516,7 +532,7 @@ function weekendCodes(){ const codes=[]; let seen=0; // matchs du 1er week-end a
   for(const el of $('resList').children){ if(el.tagName==='H3'){ if(seen++) break; } else if(el.dataset.code) codes.push(el.dataset.code); } return codes; }
 // la série est gardée dans le navigateur (IndexedDB, photos comprises) : ✕ ou un rechargement ne la perdent pas
 const SERIES_KEY='__series';
-function saveSeries(){ if(!series) return; const data={label:series.label,i:series.i,step:series.step||1,H,
+function saveSeries(){ if(!series) return; const data={label:series.label,i:series.i,step:series.step||1,H,seed:series.seed,desc:series.desc,descEdited:series.descEdited,
     items:series.items.map(it=>({m:it.m,skip:it.skip,snap:it.snap?{...it.snap,matchPhoto:it.snap.matchPhoto?it.snap.matchPhoto.src:null}:null}))};
   idb.put(SERIES_KEY,JSON.stringify(data)); }
 async function savedSeries(){ try{ const v=await idb.get(SERIES_KEY); return v?JSON.parse(v):null; }catch(e){ return null; } }
@@ -524,7 +540,7 @@ async function dropSeries(){ await idb.del(SERIES_KEY); series=null; drawResume(
 async function drawResume(){ const sv=await savedSeries(); $('resSeries').hidden=!sv; if(sv) $('resSeriesLbl').textContent=sv.label.replace('Week-end du ','Week-end ')+` · ${sv.items.filter(x=>!x.skip).length} visuel(s)`; }
 async function resumeSeries(sv){
   for(const it of sv.items) if(it.snap&&it.snap.matchPhoto) it.snap.matchPhoto=await img(it.snap.matchPhoto);
-  series={items:sv.items,i:sv.i||0,editing:null,label:sv.label,step:sv.step};
+  series={items:sv.items,i:sv.i||0,editing:null,label:sv.label,step:sv.step,seed:sv.seed,desc:sv.desc,descEdited:sv.descEdited};
   if(sv.H&&sv.H!==H){ H=sv.H; document.querySelectorAll('[data-fmt]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.fmt===H)); }
   openResults(false); $('series').hidden=false; document.body.classList.add('noscroll'); $('serTitle').textContent=series.label.replace('Week-end du ','Week-end ');
   if(sv.step===2) overview(); else { showStep(1); showItem(series.i); } }
@@ -568,13 +584,22 @@ async function overview(){ showStep(2); const live=series.items.filter(x=>!x.ski
   $('serGrid').innerHTML=live.length?live.map(it=>{ const k=series.items.indexOf(it), team=teams.find(t=>t.id===it.snap.team);
     return `<button type="button" class="sthumb" data-k="${k}"><img src="${it.url}" alt=""><span><b>${esc(team?team.name:cap(it.m.aizenay))}</b><small>${esc(cap(it.m.adversaire))} · ${esc(it.m.score.join(' - '))}</small></span><i>✎ Retoucher</i></button>`; }).join('')
     :'<p class="small">Tous les matchs sont ignorés.</p>';
-  $('serAll').disabled=!live.length; $('serAll').textContent=live.length>1?`Tout télécharger (${live.length})`:'Télécharger'; saveSeries(); }
+  $('serAll').disabled=!live.length; $('serAll').textContent=live.length>1?`Tout télécharger (${live.length})`:'Télécharger';
+  if(!series.descEdited) regenSeriesDesc(); else $('sText').value=series.desc||''; saveSeries(); }
+function seriesMatches(){ return series.items.filter(x=>!x.skip).map(it=>{ const sn=it.snap, o=opps.find(x=>x.id===sn.oppId), t=teams.find(x=>x.id===sn.team);
+  const sets=sn.cells.map(([x,y])=>[+x,+y]).filter(([x,y])=>Number.isFinite(x)&&Number.isFinite(y)&&(x||y)&&x!==y);
+  return descMatch({team:t?t.name:cap(it.m.aizenay),opp:o?o.name:(sn.oppFree||cap(it.m.adversaire)),sets,m:it.m,cup:sn.cup,date:it.m.date}); }); }
+function regenSeriesDesc(){ series.seed=series.seed||1; series.desc=Description.caption(seriesMatches(),{seed:series.seed,detail:$('sDetail').checked,tags:$('sTags').checked}); $('sText').value=series.desc; }
+$('sAgain').addEventListener('click',()=>{ series.seed=(series.seed||1)+1; series.descEdited=false; regenSeriesDesc(); saveSeries(); });
+['sDetail','sTags'].forEach(id=>$(id).addEventListener('change',()=>{ series.descEdited=false; regenSeriesDesc(); saveSeries(); }));
+$('sText').addEventListener('input',()=>{ series.desc=$('sText').value; series.descEdited=true; saveSeries(); });
+$('sCopy').addEventListener('click',()=>{ if($('sText').value.trim()) copyText($('sText').value); });
 document.querySelectorAll('[data-sfmt]').forEach(b=>b.addEventListener('click',()=>{ H=+b.dataset.sfmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.fmt===H)); overview(); }));
 $('serBack').addEventListener('click',()=>{ showStep(1); showItem(0); });
 // retoucher un visuel dans le studio, puis revenir à la série
 $('serGrid').addEventListener('click',async e=>{ const b=e.target.closest('.sthumb'); if(!b) return; const k=+b.dataset.k;
   series.editing=k; $('series').hidden=true; document.body.classList.remove('noscroll');
-  await restoreSnap(series.items[k].snap); await render();
+  await restoreSnap(series.items[k].snap); await render(); curMatch=series.items[k].m; regenDesc();
   $('serBarN').textContent=`${series.items.filter(x=>!x.skip).indexOf(series.items[k])+1} / ${series.items.filter(x=>!x.skip).length}`; $('serBar').hidden=false; window.scrollTo({top:0,behavior:'smooth'}); });
 $('serReturn').addEventListener('click',()=>{ if(!series||series.editing==null) return; series.items[series.editing].snap=takeSnap(); series.editing=null;
   activeText=null; adjusting=false; drawTextList(); syncMoveUI(); $('serBar').hidden=true; $('series').hidden=false; document.body.classList.add('noscroll'); overview(); });
