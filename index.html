@@ -138,6 +138,7 @@
     <div id="serStep2" hidden>
       <div class="seg" role="group" aria-label="Format de tous les visuels"><button type="button" data-sfmt="1350" aria-pressed="true">Post 4:5</button><button type="button" data-sfmt="1920" aria-pressed="false">Story</button></div>
       <div class="sergrid" id="serGrid"></div>
+      <button type="button" id="serDrop" class="ghost sm">Supprimer la série</button>
       <div class="sernav"><button type="button" id="serBack">Revoir les photos</button><button type="button" id="serAll" class="main">Tout télécharger</button></div>
     </div>
   </div>
@@ -154,6 +155,7 @@
       <button type="button" class="close" id="resClose" aria-label="Fermer la page Matchs">✕</button>
     </div>
     <p class="small resintro"><span id="resMaj"></span></p>
+    <div class="resume" id="resSeries" hidden><span>Série en cours · <b id="resSeriesLbl"></b></span><span class="row"><button type="button" id="resDrop" class="ghost">Supprimer</button><button type="button" id="resResume" class="main">Reprendre</button></span></div>
     <div class="filters">
       <label>Équipe<select id="fTeam"><option value="">Toutes les équipes</option></select></label>
       <label>Week-end<select id="fWeek"><option value="">Tous les week-ends</option></select></label>
