@@ -43,7 +43,10 @@ let opps=[
   {name:"Volley Sud Vendée",ffvb:"0859366",logo:"assets/logos/volley-sud-vendee-lucon.webp",aka:["Volley Sud Vendée (Luçon)"]}
 ].map(o=>({id:uid(),...o}));
 const SETTINGS=['venue'];
-const teamPhotos={}; // id -> dataURL (kept in IndexedDB)
+const teamPhotos={};
+// photos d'équipe par défaut, dans le dépôt (assets/equipes) : utilisées si l'appareil n'a pas sa propre photo
+const TEAM_PHOTOS={'regionale masculine':'assets/equipes/regionale-masculine.jpg'};
+const teamPhoto=t=>t&&(teamPhotos[t.id]||TEAM_PHOTOS[norm(t.name).trim()]||null); // id -> dataURL (kept in IndexedDB)
 
 // ---------- storage ----------
 function store(){ try{ const o={}; SETTINGS.forEach(k=>o[k]=$(k).value); o.seed=SEED; o.logo=clubLogoData; o.teams=teams; o.opps=opps; o.team=$('team').value; o.oppId=oppId; localStorage.setItem('griffonsStudio4',JSON.stringify(o)); }catch(e){ toast('Stockage du navigateur plein'); } }
@@ -71,7 +74,7 @@ const curOpp=()=>oppId==='__free'?{name:$('opp').value,logo:null}:(opps.find(o=>
 const curTeam=()=>teams.find(t=>t.id===$('team').value)||{name:'',id:null};
 const comp=()=>curTeam().name||'';
 let photoCache={};
-async function currentPhoto(){ if(matchPhoto) return matchPhoto; const t=curTeam(); const d=teamPhotos[t.id]; if(!d) return null; if(!photoCache[t.id]) photoCache[t.id]=await img(d); return photoCache[t.id]; }
+async function currentPhoto(){ if(matchPhoto) return matchPhoto; const t=curTeam(); const d=teamPhoto(t); if(!d) return null; if(!photoCache[d]) photoCache[d]=await img(d); return photoCache[d]; }
 async function loadClubLogo(){ clubLogo=await img(clubLogoData||DEFAULT_LOGO); $('logoThumb').src=clubLogoData||DEFAULT_LOGO; $('hdrLogo').src=clubLogoData||DEFAULT_LOGO; }
 async function loadOpp(){ oppImg=await img(curOpp().logo); }
 
@@ -202,7 +205,7 @@ async function render(){
 
 // ---------- UI ----------
 function sync(){ $('oppFreeL').hidden=oppId!=='__free'; document.querySelectorAll('[data-for]').forEach(el=>el.hidden=el.dataset.for!==kind); $('awayL').hidden=kind!=='match'||$('home').value==='1'; }
-function photoInfo(){ const has=!!teamPhotos[curTeam().id]; $('photoDel').hidden=!matchPhoto; $('photoInfo').textContent=matchPhoto?'Photo du match utilisée.':(has?'':'Pas de photo par défaut pour cette équipe (Réglages du club › Équipes).'); }
+function photoInfo(){ const has=!!teamPhoto(curTeam()); $('photoDel').hidden=!matchPhoto; $('photoInfo').textContent=matchPhoto?'Photo du match utilisée.':(has?'':'Pas de photo par défaut pour cette équipe (Réglages du club › Équipes).'); }
 document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{ kind=b.dataset.kind; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x===b)); sync(); render(); }));
 document.querySelectorAll('[data-fmt]').forEach(b=>b.addEventListener('click',()=>{ H=+b.dataset.fmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.setAttribute('aria-pressed',x===b)); render(); }));
 ['date','time','home','awayVenue','sets','opp','venue','team','cupLabel'].forEach(id=>$(id).addEventListener('input',()=>{ sync(); if(id==='opp') drawBtn(); render(); if(id==='venue'||id==='team') store(); }));
@@ -219,7 +222,7 @@ function drawPicker(){ drawBtn(); const q=$('oppSearch').value; const list=sorte
   $('oppPick').innerHTML=list.map(o=>`<button type="button" role="option" data-id="${o.id}" aria-selected="${o.id===oppId}">${o.logo?`<img src="${o.logo}" alt="">`:'<span class="nologo">?</span>'}${esc(o.name||'(sans nom)')}</button>`).join('')
     +(list.length?'':'<div class="empty">Aucun club trouvé.</div>')+`<button type="button" role="option" data-id="__free" aria-selected="${oppId==='__free'}"><span class="nologo">+</span>Autre adversaire…</button>`;
   const sel=$('oppPick').querySelector('[aria-selected=true]'); if(sel){ const pk=$('oppPick'); if(sel.offsetTop<pk.scrollTop||sel.offsetTop+sel.offsetHeight>pk.scrollTop+pk.clientHeight) pk.scrollTop=sel.offsetTop-pk.clientHeight/2+sel.offsetHeight/2; } }
-function drawTeams(){ $('teamList').innerHTML=teams.map(t=>`<div class="item"><label class="pick ph" title="Photo par défaut">${teamPhotos[t.id]?`<img src="${teamPhotos[t.id]}" alt="">`:'photo'}<input type="file" accept="image/*" data-tphoto="${t.id}" aria-label="Photo par défaut de ${esc(t.name)}"></label><input type="text" data-t="${t.id}" value="${esc(t.name)}" aria-label="Nom de l'équipe">${teamPhotos[t.id]?`<button type="button" class="ghost sm" data-tpdel="${t.id}" aria-label="Retirer la photo">Retirer photo</button>`:''}<button type="button" class="del" data-tdel="${t.id}" aria-label="Supprimer l'équipe">✕</button></div>`).join('')||'<p class="small">Aucune équipe.</p>'; }
+function drawTeams(){ $('teamList').innerHTML=teams.map(t=>`<div class="item"><label class="pick ph" title="Photo par défaut">${teamPhoto(t)?`<img src="${teamPhoto(t)}" alt="">`:'photo'}<input type="file" accept="image/*" data-tphoto="${t.id}" aria-label="Photo par défaut de ${esc(t.name)}"></label><input type="text" data-t="${t.id}" value="${esc(t.name)}" aria-label="Nom de l'équipe">${teamPhotos[t.id]?`<button type="button" class="ghost sm" data-tpdel="${t.id}" aria-label="Retirer la photo">Retirer photo</button>`:''}<button type="button" class="del" data-tdel="${t.id}" aria-label="Supprimer l'équipe">✕</button></div>`).join('')||'<p class="small">Aucune équipe.</p>'; }
 function drawClubs(){ const q=$('clubSearch').value; const list=sortedOpps().filter(o=>match(o,q));
   $('oppList').innerHTML=list.map(o=>`<div class="item"><label class="pick" title="Changer le logo">${o.logo?`<img src="${o.logo}" alt="">`:'logo'}<input type="file" accept="image/*" data-ologo="${o.id}" aria-label="Logo de ${esc(o.name)}"></label><input type="text" data-o="${o.id}" value="${esc(o.name)}" aria-label="Nom du club"><button type="button" class="del" data-odel="${o.id}" aria-label="Supprimer ${esc(o.name)}">✕</button></div>`).join('')||'<p class="small">Aucun club trouvé.</p>'; }
 
@@ -575,7 +578,7 @@ async function showItem(i){ series.i=i; const it=series.items[i];
   $('serCount').textContent=`Match ${i+1} / ${series.items.length}`;
   $('serTeam').textContent=team?team.name:cap(it.m.aizenay);
   $('serLine').textContent=`${it.m.domicile?'contre':'chez'} ${cap(it.m.adversaire)} · ${a} - ${b}`;
-  const hasDef=!!(team&&teamPhotos[team.id]);
+  const hasDef=!!teamPhoto(team);
   $('serDef').hidden=!hasDef; $('serNoDef').hidden=hasDef;
   $('serDef').setAttribute('aria-pressed',!it.snap.matchPhoto); $('serImp').classList.toggle('on',!!it.snap.matchPhoto);
   $('serSkip').textContent=it.skip?'Reprendre ce match':'Ignorer ce match'; $('serStep1').classList.toggle('skipped',it.skip);
