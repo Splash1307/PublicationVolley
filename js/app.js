@@ -179,13 +179,13 @@ function infoLines(o,lines,size){ ctx.save(); ctx.translate(0,o); ctx.fillStyle=
 let photo=null, adj={z:1,dx:0,dy:0}, adjPhoto=null, texts=[], textBoxes=[];
 async function render(){
   photo=await currentPhoto(); photoInfo(); if(!photo&&adjusting){ adjusting=false; } syncMoveUI();
-  cv.width=W; cv.height=H; const o=H-1350, top=H===1920?150:0;
+  cv.width=W; cv.height=H; textBoxes=[]; const o=H-1350, top=H===1920?150:0;
   backdrop(); waves(o);
   const title=comp().toUpperCase();
   if(kind==='result'){
-    grunge(dmy($('date').value),W-22,top+64,56,'right',360);
-    const cup=$('cupLabel').value.trim(); if(cup) grunge(cup.toUpperCase(),22,top+64,56,'left',W-22-360-40); // ex. « 1ER TOUR COUPE DE VENDÉE »
-    grunge(title,W/2,top+186,104,'center',900);
+    drawFixed('date',dmy($('date').value),W-22,top+64,56,'right',360);
+    const cup=$('cupLabel').value.trim(); if(cup) drawFixed('cup',cup.toUpperCase(),22,top+64,56,'left',W-22-360-40); // ex. « 1ER TOUR COUPE DE VENDÉE »
+    drawFixed('title',title,W/2,top+186,104,'center',900);
     const sets=parseSets($('sets').value); let a=0,b=0; sets.forEach(([x,y])=>x>y?a++:b++);
     plate(o,()=>clubLogo&&contain(clubLogo,229,1053,150,150),()=>{ ctx.fillStyle=C.navy; ctx.textAlign='center'; ctx.font='150px Anton'; ctx.fillText(`${a} - ${b}`,540,1108); },oppMark);
     const parts=sets.map(([x,y])=>`${x}:${y}`); const lines=[]; for(let i=0;i<parts.length;i+=2) lines.push(parts.slice(i,i+2).join(', ')+(i+2<parts.length?',':''));
@@ -354,24 +354,44 @@ outImg.addEventListener('pointerdown',e=>{
   else if(!hit&&!onHandle&&activeText&&!adjusting){ setActive(null); return; } // tap an empty spot: stop editing
   if(!adjusting&&!activeText) return;
   e.preventDefault(); outImg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(ptrs.size===1){ if(onHandle){ const t=texts.find(x=>x.id===activeText); drag='size'; size0={t,size:t.size,d:Math.max(20,Math.hypot(c.x-t.x,c.y-t.y))}; }
+  if(ptrs.size===1){ if(onHandle&&ab.fixed){ const o=getT(activeText); drag='size'; size0={o,k:o.k||1,d:Math.max(20,Math.hypot(c.x-ab.cx,c.y-ab.cy)),cx:ab.cx,cy:ab.cy}; }
+    else if(onHandle){ const t=texts.find(x=>x.id===activeText); drag='size'; size0={t,size:t.size,d:Math.max(20,Math.hypot(c.x-t.x,c.y-t.y))}; }
     else drag=hit?hit.id:(adjusting&&photo?'photo':null); }
-  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; const t=activeText&&texts.find(x=>x.id===activeText); if(t) size0={t,size:t.size}; drag=null; } });
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0=Math.hypot(a.x-b.x,a.y-b.y); zoom0=adj.z; const t=activeText&&texts.find(x=>x.id===activeText); if(t) size0={t,size:t.size}; else if(activeText){ const o=getT(activeText); size0={o,k:o.k||1}; } drag=null; } });
 outImg.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; const p=ptrs.get(e.pointerId);
+  if(ptrs.size===1&&drag==='size'&&size0.o){ const c=toCanvas(e); size0.o.k=Math.min(3,Math.max(.35,size0.k*Math.hypot(c.x-size0.cx,c.y-size0.cy)/size0.d)); reRender(); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); return; }
   if(ptrs.size===1&&drag==='size'){ const c=toCanvas(e), t=size0.t; t.size=Math.round(Math.min(TEXT_MAX,Math.max(TEXT_MIN,size0.size*Math.hypot(c.x-t.x,c.y-t.y)/size0.d))); reRender(); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); return; }
   if(ptrs.size===1&&drag){ const dx=(e.clientX-p.x)*scale(), dy=(e.clientY-p.y)*scale();
-    if(drag==='photo'){ adj.dx+=dx; adj.dy+=dy; } else { const t=texts.find(x=>x.id===drag); if(t){ t.x=Math.min(W,Math.max(0,t.x+dx)); t.y=Math.min(H,Math.max(0,t.y+dy)); } }
+    if(drag==='photo'){ adj.dx+=dx; adj.dy+=dy; } else if(drag.startsWith('fx:')){ const o=getT(drag); o.dx=(o.dx||0)+dx; o.dy=(o.dy||0)+dy; } else { const t=texts.find(x=>x.id===drag); if(t){ t.x=Math.min(W,Math.max(0,t.x+dx)); t.y=Math.min(H,Math.max(0,t.y+dy)); } }
     reRender(); }
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(ptrs.size===2&&pinch0){ const [a,b]=[...ptrs.values()], k=Math.hypot(a.x-b.x,a.y-b.y)/pinch0;
-    if(activeText&&size0){ size0.t.size=Math.round(Math.min(TEXT_MAX,Math.max(TEXT_MIN,size0.size*k))); reRender(); } else if(adjusting&&photo) zoomTo(zoom0*k); } });
+    if(activeText&&size0&&size0.o){ size0.o.k=Math.min(3,Math.max(.35,size0.k*k)); reRender(); } else if(activeText&&size0){ size0.t.size=Math.round(Math.min(TEXT_MAX,Math.max(TEXT_MIN,size0.size*k))); reRender(); } else if(adjusting&&photo) zoomTo(zoom0*k); } });
 ['pointerup','pointercancel'].forEach(t=>outImg.addEventListener(t,e=>{ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch0=0; if(!ptrs.size) drag=null; }));
 outImg.addEventListener('wheel',e=>{ if(!adjusting||!photo) return; e.preventDefault(); zoomTo(adj.z*(e.deltaY<0?1.08:1/1.08)); },{passive:false});
 
 // ---------- free texts ----------
 const HANDLE_R=30, TEXT_MIN=28, TEXT_MAX=320;
 const TEXT_COLORS=[['#ffffff','Blanc'],[C.yel,'Jaune'],[C.sky,'Bleu ciel'],[C.navy,'Bleu marine']];
-function drawTexts(){ textBoxes=[];
+// textes intégrés au visuel (titre, date, coupe) : déplaçables, redimensionnables, couleur et texte modifiables
+// fx[clé] = {dx, dy, k (échelle), color, text} ; vide = réglage d'origine
+let fx={};
+const FX_NAMES={title:'Titre (équipe)',date:'Date',cup:'Coupe'};
+function drawFixed(key,text,x,y,size,align,maxW,color='#fff'){ const o=fx[key]||{}, t=o.text!=null?o.text:text; if(!t) return;
+  const k=o.k||1, X=x+(o.dx||0), Y=y+(o.dy||0), mw=Math.min(W-40,maxW*k), s=fit(ctx,t,mw,Math.round(size*k),'Anton'), wd=ctx.measureText(t).width;
+  grunge(t,X,Y,Math.round(size*k),align,mw,o.color||color);
+  const left=align==='center'?X-wd/2:align==='right'?X-wd:X;
+  const b={id:'fx:'+key,fixed:true,x:left-16,y:Y-s*.86,w:wd+32,h:s*1.04,cx:left+wd/2,cy:Y-s*.36,base:size,text:t,color:o.color||color};
+  b.hx=Math.min(b.x+b.w,W-HANDLE_R-6); b.hy=Math.min(b.y+b.h,H-HANDLE_R-6); textBoxes.push(b); }
+function frameBox(b,active){ const ctx=ox; ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=5; ctx.strokeStyle=active?C.yel:'rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h);
+  if(active){ // resize handle, bottom-right corner
+    ctx.setLineDash([]); ctx.fillStyle=C.yel; ctx.strokeStyle=C.navy; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(b.hx,b.hy,HANDLE_R,0,7); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(b.hx-11,b.hy+11); ctx.lineTo(b.hx+11,b.hy-11); ctx.moveTo(b.hx+3,b.hy-11); ctx.lineTo(b.hx+11,b.hy-11); ctx.lineTo(b.hx+11,b.hy-3);
+    ctx.moveTo(b.hx-11,b.hy+3); ctx.lineTo(b.hx-11,b.hy+11); ctx.lineTo(b.hx-3,b.hy+11); ctx.stroke(); }
+  ctx.restore(); }
+// objet modifiable par la fiche : un texte libre, ou le réglage d'un texte intégré
+function getT(id){ if(id&&id.startsWith('fx:')){ const k=id.slice(3); return fx[k]||(fx[k]={}); } return texts.find(x=>x.id===id); }
+function drawTexts(){ textBoxes.filter(b=>b.fixed&&b.id===activeText).forEach(b=>frameBox(b,true));
   texts.forEach(t=>{ if(!t.text.trim()) return; const lines=t.text.split('\n');
     // shrink a line that would not fit the width of the visual
     ctx.font=`${t.size}px Anton`; const wide=Math.max(...lines.map(l=>ctx.measureText(l).width)); const size=wide>W-60?Math.floor(t.size*(W-60)/wide):t.size;
@@ -383,14 +403,18 @@ function drawTexts(){ textBoxes=[];
       else grunge(l,t.x,base,size,'center',W-60,t.color); });
     const b={id:t.id,x:t.x-mw/2-24,y:y0-lh/2-16,w:mw+48,h:lines.length*lh+32}; b.hx=Math.min(b.x+b.w,W-HANDLE_R-6); b.hy=Math.min(b.y+b.h,H-HANDLE_R-6); textBoxes.push(b);
     // dashed frame: drawn on the overlay canvas (#ov) above the preview, never in the image itself
-    if(adjusting||t.id===activeText){ const ctx=ox; ctx.save(); ctx.setLineDash([14,10]); ctx.lineWidth=5; ctx.strokeStyle=t.id===activeText?C.yel:'rgba(255,255,255,.9)'; ctx.strokeRect(b.x,b.y,b.w,b.h);
-      if(t.id===activeText){ // resize handle, bottom-right corner
-        ctx.setLineDash([]); ctx.fillStyle=C.yel; ctx.strokeStyle=C.navy; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(b.hx,b.hy,HANDLE_R,0,7); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(b.hx-11,b.hy+11); ctx.lineTo(b.hx+11,b.hy-11); ctx.moveTo(b.hx+3,b.hy-11); ctx.lineTo(b.hx+11,b.hy-11); ctx.lineTo(b.hx+11,b.hy-3);
-        ctx.moveTo(b.hx-11,b.hy+3); ctx.lineTo(b.hx-11,b.hy+11); ctx.lineTo(b.hx-3,b.hy+11); ctx.stroke(); }
-      ctx.restore(); } }); }
+    if(adjusting||t.id===activeText) frameBox(b,t.id===activeText); }); }
+function fixedCard(){ if(!activeText||!activeText.startsWith('fx:')) return ''; const key=activeText.slice(3), o=getT(activeText), b=textBoxes.find(x=>x.id===activeText)||{}, col=o.color||b.color||'#ffffff';
+  return `<div class="tcard open fixed" data-tid="${activeText}">
+    <div class="thead"><button type="button" class="tsum" data-tx="toggle" aria-expanded="true"><span class="dot" style="--c:${col}"></span><span class="tprev">${FX_NAMES[key]}</span><span class="chev" aria-hidden="true"></span></button>
+      <button type="button" class="ghost sm" data-tx="reset">Rétablir</button></div>
+    <input type="text" data-tx="text" value="${esc(o.text!=null?o.text:(b.text||''))}" aria-label="${FX_NAMES[key]}">
+    <div class="trow"><div class="chips" role="group" aria-label="Couleur">${TEXT_COLORS.map(([c,n])=>`<button type="button" class="chip" data-tx="color" data-c="${c}" style="--c:${c}" aria-label="${n}" title="${n}" aria-pressed="${col===c}"></button>`).join('')}
+        <label class="chip any" title="Toutes les couleurs" aria-pressed="${!TEXT_COLORS.some(([c])=>c===col)}" style="--c:${col}"><input type="color" data-tx="pick" value="${col}" aria-label="Choisir une autre couleur"></label></div></div>
+    <p class="small tmove">Sur l'aperçu : fais glisser le texte encadré pour le déplacer, et le rond jaune pour l'agrandir ou le réduire.</p>
+  </div>`; }
 function drawTextList(){
-  $('textList').innerHTML=texts.map((t,i)=>{ const open=t.id===activeText;
+  $('textList').innerHTML=fixedCard()+texts.map((t,i)=>{ const open=t.id===activeText;
     return `<div class="tcard${open?' open':''}" data-tid="${t.id}">
     <div class="thead"><button type="button" class="tsum" data-tx="toggle" aria-expanded="${open}"><span class="dot" style="--c:${t.color}"></span><span class="tprev">${esc(t.text.replace(/\n/g,' ')||'Texte '+(i+1))}</span><span class="chev" aria-hidden="true"></span></button>
       <button type="button" class="del" data-tx="del" aria-label="Supprimer le texte ${i+1}">✕</button></div>
@@ -404,12 +428,13 @@ document.addEventListener('pointerdown',e=>{ if(!activeText) return; const t=e.t
   if(t===outImg||t.closest('#textList')||t.closest('#textAdd')||t.closest('#dl')) return; setActive(null); });
 $('textAdd').addEventListener('click',()=>{ const t={id:uid(),text:'',size:90,color:'#ffffff',style:'grunge',x:W/2,y:Math.round(H*.32)+(texts.length%5)*130}; texts.push(t); setActive(t.id);
   $('textList').querySelector(`[data-tid="${t.id}"] textarea`).focus(); });
-$('textList').addEventListener('input',e=>{ const card=e.target.closest('[data-tid]'); if(!card) return; const t=texts.find(x=>x.id===card.dataset.tid);
+$('textList').addEventListener('input',e=>{ const card=e.target.closest('[data-tid]'); if(!card) return; const t=getT(card.dataset.tid);
   if(e.target.dataset.tx==='text'){ t.text=e.target.value; card.querySelector('.tprev').textContent=t.text.replace(/\n/g,' ')||'Texte'; }
   if(e.target.dataset.tx==='pick'){ t.color=e.target.value; const any=e.target.parentElement; any.style.setProperty('--c',t.color); any.setAttribute('aria-pressed',true); card.querySelectorAll('button.chip').forEach(c=>c.setAttribute('aria-pressed',false)); card.querySelector('.dot').style.setProperty('--c',t.color); }
   reRender(); });
-$('textList').addEventListener('click',e=>{ const b=e.target.closest('button[data-tx]'); if(!b) return; const card=b.closest('[data-tid]'); const t=texts.find(x=>x.id===card.dataset.tid);
-  if(b.dataset.tx==='toggle'){ setActive(activeText===t.id?null:t.id); return; }
+$('textList').addEventListener('click',e=>{ const b=e.target.closest('button[data-tx]'); if(!b) return; const card=b.closest('[data-tid]'), id=card.dataset.tid; const t=getT(id);
+  if(b.dataset.tx==='toggle'){ setActive(activeText===id?null:id); return; }
+  if(b.dataset.tx==='reset'){ delete fx[id.slice(3)]; render().then(drawTextList); return; }
   if(b.dataset.tx==='del'){ texts=texts.filter(x=>x!==t); if(activeText===t.id) activeText=null; drawTextList(); syncMoveUI(); render(); return; }
   if(b.dataset.tx==='color'){ t.color=b.dataset.c; card.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b)); card.querySelector('.dot').style.setProperty('--c',t.color); }
   if(b.dataset.tx==='style'){ t.style=b.dataset.s; card.querySelectorAll('[data-tx=style]').forEach(c=>c.setAttribute('aria-pressed',c===b)); }
@@ -470,7 +495,7 @@ function drawResults(){ const box=$('resList'); if(!results){ box.innerHTML='<p 
 // remplit le studio avec un match FFVB (sans rendu ni interface)
 let curMatch=null; // dernier match FFVB importé dans le studio
 function fillFromMatch(m){
-  curMatch=m;
+  curMatch=m; fx={};
   kind='result'; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.kind==='result'));
   const t=m.equipe&&teams.find(x=>norm(x.name)===norm(m.equipe));
   if(t) $('team').value=t.id;
@@ -499,7 +524,7 @@ function newBlank(){
   matchPhoto=null; $('photo').value=''; oppId=null; $('opp').value='';
   $('date').value=new Date().toISOString().slice(0,10); $('cupLabel').value='';
   for(let i=0;i<5;i++){ cell(i,0).value=''; cell(i,1).value=''; }
-  texts=[]; activeText=null; adjusting=false; drawTextList(); curMatch=null; $('dText').value='';
+  texts=[]; activeText=null; adjusting=false; fx={}; drawTextList(); curMatch=null; $('dText').value='';
   drawBtn(); drawPicker(); sync(); store(); setBestOf(5); openMatch(true); loadOpp().then(render);
   openResults(false); toast('Nouvelle publication : remplis le match'); }
 $('newBlank').addEventListener('click',newBlank);
@@ -532,12 +557,12 @@ $('dCopy').addEventListener('click',()=>{ if(!$('dText').value.trim()) regenDesc
 let series=null; // {items:[{m,skip,snap,url,blob}], i, editing}
 const clone=o=>JSON.parse(JSON.stringify(o));
 function takeSnap(){ return {team:$('team').value, oppId, oppFree:$('opp').value, date:$('date').value, cup:$('cupLabel').value, bestOf,
-  cells:[0,1,2,3,4].map(i=>[cell(i,0).value,cell(i,1).value]), matchPhoto, adj:{...adj}, texts:clone(texts)}; }
+  cells:[0,1,2,3,4].map(i=>[cell(i,0).value,cell(i,1).value]), matchPhoto, adj:{...adj}, texts:clone(texts), fx:clone(fx)}; }
 async function restoreSnap(sn){
   $('team').value=sn.team; oppId=sn.oppId; $('opp').value=sn.oppFree; $('date').value=sn.date; $('cupLabel').value=sn.cup;
   bestOf=sn.bestOf; document.querySelectorAll('[data-bo]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.bo===bestOf));
   sn.cells.forEach(([x,y],i)=>{ cell(i,0).value=x; cell(i,1).value=y; });
-  matchPhoto=sn.matchPhoto; $('photo').value=''; texts=clone(sn.texts); activeText=null; adjusting=false;
+  matchPhoto=sn.matchPhoto; $('photo').value=''; texts=clone(sn.texts); fx=clone(sn.fx||{}); activeText=null; adjusting=false;
   drawBtn(); drawPicker(); sync(); drawTextList(); syncMoveUI(); syncSets(true); await loadOpp();
   adjPhoto=await currentPhoto(); adj={...sn.adj}; }
 const itemName=it=>`resultat-${slug(teams.find(t=>t.id===it.snap.team)?.name||'equipe')}-${slug(it.m.adversaire)}-${it.m.date}.jpg`;
