@@ -362,3 +362,21 @@ body.on-page .wrap,body.on-page .top,body.on-page .serbar{visibility:hidden}
   .sheet-head .close,.sheet-head .newpub,.headnav .gear,#homeSet{width:38px;height:38px;flex:none}
   .headnav{gap:6px}
 }
+
+/* ===== l'appli occupe toute la largeur disponible (ordinateur, tablette, téléphone) ===== */
+.top,.wrap{max-width:none}
+.sheet-in{width:100%!important}
+@media(min-width:821px){
+  .wrap{grid-template-columns:minmax(0,1.1fr) minmax(380px,1fr)}
+  .frame img{max-height:calc(100vh - 190px)}
+}
+/* page Matchs : les cartes se répartissent en colonnes selon la largeur */
+#resList{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,430px),1fr));gap:12px;align-items:start}
+#resList .wk,#resList > p{grid-column:1/-1;margin-bottom:0}
+#resList .res{margin:0}
+/* série et planning : vignettes plus grandes sur grand écran */
+@media(min-width:1100px){ .sergrid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))} .plgrid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))} }
+/* réglages : listes d'équipes et de clubs sur deux colonnes quand il y a la place */
+@media(min-width:1000px){ #teamList,#oppList{display:grid;grid-template-columns:1fr 1fr;column-gap:28px} }
+/* accueil : cartes hautes qui remplissent l'écran */
+@media(min-width:760px){ #accueil .hcard{min-height:min(46vh,420px)} #accueil .hcard b{font-size:clamp(52px,5vw,84px)} #accueil .hcard small{font-size:18px} }
