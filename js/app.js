@@ -823,6 +823,14 @@ function syncHash(){ if(routing) return; const p=pageNow(), h='#'+p; if(location
   document.body.classList.toggle('on-page',p!=='studio'); }
 new MutationObserver(()=>{ document.body.classList.toggle('on-page',pageNow()!=='studio'); syncHash(); })
   .observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden']});
+// maison + réglages dans l'en-tête de chaque page (sauf le bouton de la page où on est)
+{ const home=$('homeOpen').innerHTML, gear=$('setOpen').innerHTML;
+  for(const [k,id] of Object.entries(SHEETS)){ const head=$(id).querySelector('.sheet-head'); if(!head) continue;
+    const nav=document.createElement('div'); nav.className='headnav';
+    if(k!=='accueil') nav.insertAdjacentHTML('beforeend',`<button type="button" class="gear" data-nav="accueil" aria-label="Accueil" title="Accueil">${home}</button>`);
+    if(k!=='reglages'&&k!=='accueil') nav.insertAdjacentHTML('beforeend',`<button type="button" class="gear" data-nav="reglages" aria-label="Réglages" title="Réglages">${gear}</button>`);
+    if(nav.children.length) head.appendChild(nav); }
+  document.addEventListener('click',e=>{ const b=e.target.closest('[data-nav]'); if(b) route(b.dataset.nav); }); }
 window.addEventListener('popstate',()=>{ depth=Math.max(0,depth-1); route((location.hash||'#accueil').slice(1)); });
 // « ← » : revient à la page où on était avant (comme le bouton retour du téléphone), sinon à l'accueil
 ['resClose','plClose','setClose','serClose'].forEach(id=>$(id).addEventListener('click',e=>{ e.stopImmediatePropagation();
