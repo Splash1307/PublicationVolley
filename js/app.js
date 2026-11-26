@@ -812,18 +812,22 @@ $('hdrLogo').addEventListener('click',()=>openHome(true)); $('hdrLogo').style.cu
 // à la page précédente ; une adresse peut être mise en favori (ex. …/#planning).
 const SHEETS={accueil:'accueil',matchs:'results',planning:'planning',reglages:'settings',serie:'series'};
 const OPEN={accueil:()=>openHome(true),matchs:()=>openResults(true),planning:()=>openPlanning(),reglages:()=>openSettings(true)};
-let routing=false;
+let routing=false, depth=0; // depth : nombre de pages ouvertes dans l'appli depuis le démarrage
 const pageNow=()=>{ for(const [k,id] of Object.entries(SHEETS)) if(!$(id).hidden) return k; return 'studio'; };
 function closeAll(){ for(const [k,id] of Object.entries(SHEETS)) if(!$(id).hidden){ if(k==='serie'&&series){ saveSeries(); series=null; } $(id).hidden=true; }
   document.body.classList.remove('noscroll'); }
 function route(target){ if(!OPEN[target]&&target!=='studio') target=target==='serie'?'matchs':'accueil';
   if(pageNow()===target) return; routing=true; closeAll(); if(OPEN[target]) OPEN[target](); setTimeout(()=>{ routing=false; syncHash(); },0); }
 function syncHash(){ if(routing) return; const p=pageNow(), h='#'+p; if(location.hash===h) return;
-  if(!location.hash) history.replaceState(null,'',h); else history.pushState(null,'',h);
+  if(!location.hash) history.replaceState(null,'',h); else { history.pushState(null,'',h); depth++; }
   document.body.classList.toggle('on-page',p!=='studio'); }
 new MutationObserver(()=>{ document.body.classList.toggle('on-page',pageNow()!=='studio'); syncHash(); })
   .observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden']});
-window.addEventListener('popstate',()=>route((location.hash||'#accueil').slice(1)));
+window.addEventListener('popstate',()=>{ depth=Math.max(0,depth-1); route((location.hash||'#accueil').slice(1)); });
+// « ← » : revient à la page où on était avant (comme le bouton retour du téléphone), sinon à l'accueil
+['resClose','plClose','setClose','serClose'].forEach(id=>$(id).addEventListener('click',e=>{ e.stopImmediatePropagation();
+  if(id==='serClose'&&series) toast('Série gardée : reprends-la depuis la page Matchs');
+  if(depth>0) history.back(); else route('accueil'); },true));
 route(location.hash&&location.hash!=='#studio'?location.hash.slice(1):'accueil'); // l'appli s'ouvre sur l'accueil (ou la page demandée)
 (async()=>{ const all=await idb.all(); for(const k in all) if(!k.startsWith('__')) teamPhotos[k]=all[k]; drawResume(); drawTeams(); await loadClubLogo(); await loadOpp(); render();
   try{ await Promise.all([document.fonts.load('100px Anton'),document.fonts.load("600 40px 'Barlow Condensed'")]); }catch(e){} render(); })();
