@@ -710,7 +710,6 @@ function drawDay(day,imgs,Hc=1350){ const W2=W; cv.width=W2; cv.height=Hc;
   const t=ctx.createLinearGradient(0,0,0,300+top); t.addColorStop(0,'rgba(0,0,0,.35)'); t.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=t; ctx.fillRect(0,0,W,300+top);
   waves(Hc-1350);
   const x=new Date(day.date+'T12:00');
-  grunge(dmy(day.date),W-22,64+top,56,'right',360);
   if(clubLogo){ ctx.save(); ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=14; ctx.shadowOffsetY=4; contain(clubLogo,100,96+top,150,150); ctx.restore(); } // logo du club, en haut à gauche
   grunge('PLANNING',W/2,186+top,120,'center',900);
   grunge(`${JOUR[x.getDay()]} ${x.getDate()} ${MOISU[x.getMonth()]}`,W/2,262+top,56,'center',800,C.yel);
