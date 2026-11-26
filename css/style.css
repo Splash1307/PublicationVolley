@@ -380,3 +380,24 @@ body.on-page .wrap,body.on-page .top,body.on-page .serbar{visibility:hidden}
 @media(min-width:1000px){ #teamList,#oppList{display:grid;grid-template-columns:1fr 1fr;column-gap:28px} }
 /* accueil : cartes hautes qui remplissent l'écran */
 @media(min-width:760px){ #accueil .hcard{min-height:min(46vh,420px)} #accueil .hcard b{font-size:clamp(52px,5vw,84px)} #accueil .hcard small{font-size:18px} }
+
+/* planning : format post/story + aperçu agrandi au clic */
+.plfmt{max-width:360px;margin:0 auto 14px}
+.plimg{cursor:zoom-in;transition:transform .15s}
+.plimg:hover{transform:translateY(-2px)}
+.plgrid.story{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+@media(min-width:1100px){ .plgrid.story{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))} }
+.plview{position:fixed;inset:0;z-index:90;background:rgba(5,10,18,.94);display:flex;flex-direction:column;padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))}
+.plview[hidden]{display:none}
+.pvbar{display:flex;align-items:center;gap:10px;color:#fff;min-height:44px}
+.pvbar b{flex:1;font-size:16px;text-transform:capitalize}
+#pvClose{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:20px;cursor:pointer}
+.pvstage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:10px}
+.pvstage img{max-width:100%;max-height:100%;min-width:0;object-fit:contain;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.pvnav{flex:none;width:44px;height:64px;border-radius:12px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:30px;cursor:pointer}
+.pvnav:disabled{opacity:.25;cursor:default}
+.pvnav[hidden]{display:none}
+.pvfoot{display:flex;gap:10px;align-items:center;justify-content:center;padding-top:12px;flex-wrap:wrap}
+.pvfoot .seg{margin:0;min-width:240px}
+.pvfoot #pvSave{min-height:46px;padding:0 22px}
+@media(max-width:600px){ .pvnav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:56px;background:rgba(0,0,0,.45)} #pvPrev{left:6px} #pvNext{right:6px} .pvstage{position:relative} .pvfoot{flex-direction:column;align-items:stretch} .pvfoot .seg{min-width:0} }

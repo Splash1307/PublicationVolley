@@ -159,6 +159,7 @@
       <button type="button" class="close" id="plClose" aria-label="Retour au studio" hidden>←</button>
     </div>
     <div class="plnav"><button type="button" id="plPrev" aria-label="Week-end précédent">‹</button><b id="plWeek"></b><button type="button" id="plNext" aria-label="Week-end suivant">›</button></div>
+    <div class="seg plfmt" role="group" aria-label="Format des visuels du planning"><button type="button" data-pfmt="1350" aria-pressed="true">Post 4:5</button><button type="button" data-pfmt="1920" aria-pressed="false">Story</button></div>
     <div class="plgrid" id="plGrid"></div>
     <div class="desc">
       <h3>Description de la publication</h3>
@@ -167,6 +168,11 @@
     </div>
     <div class="sernav pl"><button type="button" id="plAll" class="main">Tout télécharger</button></div>
   </div>
+</div>
+<div class="plview" id="plView" role="dialog" aria-modal="true" aria-label="Aperçu du visuel" hidden>
+  <div class="pvbar"><b id="pvName"></b><button type="button" id="pvClose" aria-label="Fermer">✕</button></div>
+  <div class="pvstage"><button type="button" id="pvPrev" class="pvnav" aria-label="Visuel précédent">‹</button><img id="pvImg" alt=""><button type="button" id="pvNext" class="pvnav" aria-label="Visuel suivant">›</button></div>
+  <div class="pvfoot"><div class="seg" role="group" aria-label="Format"><button type="button" data-pfmt="1350" aria-pressed="true">Post 4:5</button><button type="button" data-pfmt="1920" aria-pressed="false">Story</button></div><button type="button" id="pvSave" class="main">Télécharger</button></div>
 </div>
 <div class="sheet" id="series" role="dialog" aria-modal="true" aria-labelledby="serTitle" hidden>
   <div class="sheet-in">

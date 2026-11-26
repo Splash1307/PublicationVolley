@@ -702,22 +702,23 @@ function txtA(t,x,y,size,color,align='left',maxW=9999){ ctx.save(); ctx.fillStyl
 function txtB(t,x,y,size,color,align='left',maxW=9999){ ctx.save(); ctx.fillStyle=color; ctx.textAlign=align; let s=size; do{ ctx.font=`600 ${s}px Barlow`; if(ctx.measureText(t).width<=maxW) break; s-=1; }while(s>12); ctx.fillText(t,x,y); ctx.restore(); }
 function hexFill(P,color,shadow){ ctx.save(); if(shadow){ ctx.shadowColor='rgba(0,0,0,.3)'; ctx.shadowBlur=16; ctx.shadowOffsetY=5; } ctx.fillStyle=color; ctx.beginPath(); P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fill(); ctx.restore(); }
 function platePath(y,h,x0=60,x1=1020){ const t=h*.42; return [[x0,y+h/2],[x0+t,y],[x1-t,y],[x1,y+h/2],[x1-t,y+h],[x0+t,y+h]]; }
-function drawDay(day,imgs){ const W2=W; cv.width=W2; cv.height=1350;
+function drawDay(day,imgs,Hc=1350){ const W2=W; cv.width=W2; cv.height=Hc;
+  const top=Hc>1350?190:0, bottom=Hc>1350?Hc-330:1240; // story : on laisse libres le haut et le bas (zones d'Instagram)
   // fond du visuel résultat sans photo
-  const g=ctx.createLinearGradient(0,0,0,1350); g.addColorStop(0,'#2c6f93'); g.addColorStop(1,'#123049'); ctx.fillStyle=g; ctx.fillRect(0,0,W,1350);
-  ctx.save(); ctx.globalAlpha=.08; ctx.strokeStyle='#fff'; ctx.lineWidth=3; for(let i=-1350;i<W;i+=60){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+675,1350); ctx.stroke(); } ctx.restore();
-  const t=ctx.createLinearGradient(0,0,0,300); t.addColorStop(0,'rgba(0,0,0,.35)'); t.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=t; ctx.fillRect(0,0,W,300);
-  waves(0);
+  const g=ctx.createLinearGradient(0,0,0,Hc); g.addColorStop(0,'#2c6f93'); g.addColorStop(1,'#123049'); ctx.fillStyle=g; ctx.fillRect(0,0,W,Hc);
+  ctx.save(); ctx.globalAlpha=.08; ctx.strokeStyle='#fff'; ctx.lineWidth=3; for(let i=-Hc;i<W;i+=60){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+Hc/2,Hc); ctx.stroke(); } ctx.restore();
+  const t=ctx.createLinearGradient(0,0,0,300+top); t.addColorStop(0,'rgba(0,0,0,.35)'); t.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=t; ctx.fillRect(0,0,W,300+top);
+  waves(Hc-1350);
   const x=new Date(day.date+'T12:00');
-  grunge(dmy(day.date),W-22,64,56,'right',360);
-  grunge('PLANNING',W/2,186,120,'center',900);
-  grunge(`${JOUR[x.getDay()]} ${x.getDate()} ${MOISU[x.getMonth()]}`,W/2,262,56,'center',800,C.yel);
-  ctx.fillStyle='#fff'; ctx.fillRect(417,300,242,6); ctx.fillRect(384,321,310,6);
+  grunge(dmy(day.date),W-22,64+top,56,'right',360);
+  grunge('PLANNING',W/2,186+top,120,'center',900);
+  grunge(`${JOUR[x.getDay()]} ${x.getDate()} ${MOISU[x.getMonth()]}`,W/2,262+top,56,'center',800,C.yel);
+  ctx.fillStyle='#fff'; ctx.fillRect(417,300+top,242,6); ctx.fillRect(384,321+top,310,6);
   // blocs : à domicile puis à l'extérieur
   const home=day.matches.filter(m=>m.domicile), away=day.matches.filter(m=>!m.domicile), groups=[[home,true],[away,false]].filter(g=>g[0].length);
-  const n=day.matches.length, heads=groups.length*78, gap=n>5?14:22, room=1240-360-heads-groups.length*16;
+  const n=day.matches.length, heads=groups.length*78, gap=n>5?14:22, y0=360+top, room=bottom-y0-heads-groups.length*16;
   const h=Math.max(78,Math.min(n<=2?170:130,Math.floor((room-gap*(n-1))/n))), k=h/120;
-  let y=360+Math.max(0,(room-(n*h+gap*(n-1)))/(n<=2?2:3));
+  let y=y0+Math.max(0,(room-(n*h+gap*(n-1)))/(n<=2?2:3));
   groups.forEach(([list,isHome])=>{ const salles=[...new Set(list.map(m=>m.salleC).filter(Boolean))];
     const title=isHome?'À DOMICILE'+(salles.length===1?' · '+salles[0].toUpperCase():''):'À L’EXTÉRIEUR';
     hexFill([[60,y+29],[86,y],[700,y],[726,y+29],[700,y+58],[86,y+58]],isHome?C.yel:C.sky,true);
@@ -732,7 +733,7 @@ function drawDay(day,imgs){ const W2=W; cv.width=W2; cv.height=1350;
       if(m.logo&&imgs[m.logo]) contain(imgs[m.logo],915,cy,100*k,88*k);
       y+=h+gap; });
     y+=16; });
-  grunge('ALLEZ LES GRIFFONS !',W-24,1300,52,'right',380);
+  grunge('ALLEZ LES GRIFFONS !',W-24,Hc>1350?Hc-280:1300,52,'right',380);
   const url=cv.toDataURL('image/jpeg',.93); return {date:day.date,url,blob:dataUrlBlob(url)}; }
 function plateDraw(P){ ctx.save(); ctx.shadowColor='rgba(0,0,0,.25)'; ctx.shadowBlur=16; ctx.shadowOffsetY=5; ctx.beginPath(); P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill(); ctx.restore();
   const g=ctx.createLinearGradient(P[0][0],P[1][1],P[3][0],P[4][1]); g.addColorStop(0,C.sky); g.addColorStop(.45,'#9fdcef'); g.addColorStop(.55,C.yel); g.addColorStop(1,C.yel);
@@ -742,17 +743,18 @@ async function drawPlanning(){ const w=plan.weeks[plan.w]; $('plWeek').textConte
   if(!w){ $('plGrid').innerHTML='<p class="small">Aucun match à venir pour le moment.</p>'; $('plAll').disabled=true; $('plText').value=''; return; }
   $('plGrid').innerHTML='<p class="small">Préparation des visuels…</p>';
   const logos={}; for(const d of w.days) for(const m of d.matches) if(m.logo&&!logos[m.logo]) logos[m.logo]=await img(m.logo);
-  const savedH=H; plan.imgs=w.days.map(d=>drawDay(d,logos)); H=savedH; render(); // le studio retrouve son visuel
-  $('plGrid').innerHTML=plan.imgs.map((im,i)=>`<figure class="plimg"><img src="${im.url}" alt="Planning du ${dmy(im.date)}"><figcaption>${JOUR[new Date(im.date+'T12:00').getDay()].toLowerCase()} · ${w.days[i].matches.length} match${w.days[i].matches.length>1?'s':''}</figcaption></figure>`).join('');
+  const savedH=H; plan.imgs=w.days.map(d=>drawDay(d,logos,plan.fmt)); H=savedH; render(); // le studio retrouve son visuel
+  $('plGrid').classList.toggle('story',plan.fmt>1350);
+  $('plGrid').innerHTML=plan.imgs.map((im,i)=>`<figure class="plimg" data-i="${i}" title="Agrandir"><img src="${im.url}" alt="Planning du ${dmy(im.date)}"><figcaption>${JOUR[new Date(im.date+'T12:00').getDay()].toLowerCase()} · ${w.days[i].matches.length} match${w.days[i].matches.length>1?'s':''}</figcaption></figure>`).join('');
   $('plAll').disabled=false; $('plAll').textContent=plan.imgs.length>1?`Tout télécharger (${plan.imgs.length})`:'Télécharger';
-  regenPlanDesc(); }
+  regenPlanDesc(); if(!$('plView').hidden) showPlanView(); }
 function regenPlanDesc(){ const w=plan.weeks[plan.w]; if(!w) return;
   const list=w.days.flatMap(d=>d.matches).map(m=>({team:m.team,opp:m.opp,date:m.date,heure:m.heure,home:m.domicile,salle:m.salleC,cup:m.cup}));
   $('plText').value=Description.planning(list,{seed:plan.seed,tags:$('plTags').checked}); }
 async function openPlanning(){ // la page s'affiche tout de suite, même si les matchs chargent encore
   $('planning').hidden=false; openResults(false); openHome(false); document.body.classList.add('noscroll');
   if(!results){ $('plAll').disabled=true; $('plPrev').disabled=$('plNext').disabled=true; $('plWeek').textContent='Chargement…'; $('plGrid').innerHTML='<p class="small">Chargement des matchs…</p>'; $('plText').value=''; await loadResults(); }
-  plan={weeks:buildWeeks(),w:0,imgs:[],seed:1}; await drawPlanning(); }
+  plan={weeks:buildWeeks(),w:0,imgs:[],seed:1,fmt:(plan&&plan.fmt)||1350,view:0}; syncPlanFmt(); await drawPlanning(); }
 $('plStart').addEventListener('click',openPlanning);
 $('plClose').addEventListener('click',()=>{ $('planning').hidden=true; document.body.classList.remove('noscroll'); });
 $('plPrev').addEventListener('click',()=>{ if(plan.w>0){ plan.w--; drawPlanning(); } });
@@ -761,9 +763,28 @@ $('plAgain').addEventListener('click',()=>{ plan.seed++; regenPlanDesc(); });
 $('plTags').addEventListener('change',regenPlanDesc);
 $('plCopy').addEventListener('click',()=>{ if($('plText').value.trim()) copyText($('plText').value); });
 $('plAll').addEventListener('click',()=>{ if(!plan||!plan.imgs.length) return; copyForShare($('plText').value);
-  const files=plan.imgs.map(im=>new File([im.blob],`planning-${slug(JOUR[new Date(im.date+'T12:00').getDay()])}-${im.date}.jpg`,{type:'image/jpeg'}));
+  const files=plan.imgs.map(planFile);
   if(isTouch()&&navigator.canShare&&navigator.canShare({files})){ navigator.share({files}).catch(e=>{ if(e&&e.name==='AbortError') return; planZip(files); }); return; }
   planZip(files); });
+const planFile=im=>new File([im.blob],`planning-${slug(JOUR[new Date(im.date+'T12:00').getDay()])}-${im.date}${plan.fmt>1350?'-story':''}.jpg`,{type:'image/jpeg'});
+// format post / story de tous les visuels du planning (sur la page et dans l'aperçu agrandi)
+function syncPlanFmt(){ document.querySelectorAll('[data-pfmt]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pfmt===plan.fmt)); }
+document.querySelectorAll('[data-pfmt]').forEach(b=>b.addEventListener('click',()=>{ if(!plan||plan.fmt===+b.dataset.pfmt) return; plan.fmt=+b.dataset.pfmt; syncPlanFmt(); drawPlanning(); }));
+// clic sur un visuel : aperçu agrandi
+function showPlanView(){ const im=plan.imgs[plan.view]; if(!im){ closePlanView(); return; }
+  const n=plan.imgs.length; $('pvImg').src=im.url; $('pvImg').alt='Planning du '+dmy(im.date);
+  $('pvName').textContent=`${JOUR[new Date(im.date+'T12:00').getDay()].toLowerCase()} ${dmy(im.date)}`+(n>1?` · ${plan.view+1}/${n}`:'');
+  $('pvPrev').hidden=$('pvNext').hidden=n<2; $('pvPrev').disabled=plan.view<=0; $('pvNext').disabled=plan.view>=n-1; }
+function closePlanView(){ $('plView').hidden=true; }
+$('plGrid').addEventListener('click',e=>{ const f=e.target.closest('.plimg'); if(!f) return; plan.view=+f.dataset.i; $('plView').hidden=false; showPlanView(); });
+$('pvClose').addEventListener('click',closePlanView);
+$('plView').addEventListener('click',e=>{ if(e.target===$('plView')||e.target.classList.contains('pvstage')) closePlanView(); });
+$('pvPrev').addEventListener('click',()=>{ if(plan.view>0){ plan.view--; showPlanView(); } });
+$('pvNext').addEventListener('click',()=>{ if(plan.view<plan.imgs.length-1){ plan.view++; showPlanView(); } });
+document.addEventListener('keydown',e=>{ if($('plView').hidden) return; if(e.key==='Escape') closePlanView(); if(e.key==='ArrowLeft') $('pvPrev').click(); if(e.key==='ArrowRight') $('pvNext').click(); });
+$('pvSave').addEventListener('click',()=>{ const im=plan.imgs[plan.view]; if(!im) return; copyForShare($('plText').value); const f=planFile(im), files=[f];
+  if(isTouch()&&navigator.canShare&&navigator.canShare({files})){ navigator.share({files}).catch(e=>{ if(e&&e.name==='AbortError') return; saveBlob(f); }); return; }
+  saveBlob(f); });
 async function planZip(files){ if(files.length===1){ saveBlob(files[0]); return; }
   const z=[]; for(const f of files) z.push({name:f.name,data:new Uint8Array(await f.arrayBuffer())});
   const u=URL.createObjectURL(zipStore(z)); const a=document.createElement('a'); a.href=u; a.download=`planning-${plan.weeks[plan.w].key}.zip`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),8000); toast(`${files.length} visuels téléchargés (.zip)`); }
@@ -833,7 +854,7 @@ new MutationObserver(()=>{ document.body.classList.toggle('on-page',pageNow()!==
     if(k!=='reglages'&&k!=='accueil') nav.insertAdjacentHTML('beforeend',`<button type="button" class="gear" data-nav="reglages" aria-label="Réglages" title="Réglages">${gear}</button>`);
     if(nav.children.length) head.appendChild(nav); }
   document.addEventListener('click',e=>{ const b=e.target.closest('[data-nav]'); if(b) route(b.dataset.nav); }); }
-window.addEventListener('popstate',()=>{ depth=Math.max(0,depth-1); route((location.hash||'#accueil').slice(1)); });
+window.addEventListener('popstate',()=>{ $('plView').hidden=true; depth=Math.max(0,depth-1); route((location.hash||'#accueil').slice(1)); });
 // « ← » : revient à la page où on était avant (comme le bouton retour du téléphone), sinon à l'accueil
 ['resClose','plClose','setClose','serClose'].forEach(id=>$(id).addEventListener('click',e=>{ e.stopImmediatePropagation();
   if(id==='serClose'&&series) toast('Série gardée : reprends-la depuis la page Matchs');
