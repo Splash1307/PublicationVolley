@@ -805,6 +805,7 @@ $('homeRes').addEventListener('click',()=>{ openHome(false); openResults(true); 
 $('homePlan').addEventListener('click',()=>{ openHome(false); openPlanning(); });
 $('homeBlank').addEventListener('click',()=>{ openHome(false); newBlank(); });
 $('homeClose').addEventListener('click',()=>openHome(false));
+$('homeOpen').addEventListener('click',()=>openHome(true));
 $('hdrLogo').addEventListener('click',()=>openHome(true)); $('hdrLogo').style.cursor='pointer'; $('hdrLogo').title='Accueil';
 // ---------- navigation : chaque écran est une page avec sa propre adresse ----------
 // #accueil, #matchs, #planning, #reglages, #serie, #studio. Le bouton retour du téléphone revient

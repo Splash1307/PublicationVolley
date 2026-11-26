@@ -185,12 +185,12 @@ button.del[data-armed]{width:auto;padding:0 10px;background:#d64545;border-color
 .wk{font:700 18px 'Barlow Condensed',sans-serif;margin:18px 0 8px}
 
 /* en-tête : bouton Matchs + roue crantée */
-.top{padding-right:max(calc(4vw + 160px),176px)}
+.top{padding-right:max(calc(4vw + 220px),236px)}
 .hdr-actions{position:absolute;right:max(4vw,16px);top:24px;display:flex;gap:10px}
 .hdr-actions .gear{position:static}
 .hbtn{display:flex;align-items:center;gap:8px;height:48px;min-height:0;padding:0 18px;border-radius:24px;background:var(--navy);border-color:var(--navy);color:#fff}
 .hbtn svg{color:var(--yel)}
-@media(max-width:480px){.top{padding-right:132px}.hbtn{width:48px;padding:0;justify-content:center}.hbtn span{display:none}}
+@media(max-width:480px){.top{padding-right:186px}.hbtn{width:48px;padding:0;justify-content:center}.hbtn span{display:none}}
 /* filtres de la page Matchs */
 .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0 4px}
 .filters select{margin-top:4px;background:var(--panel)}
@@ -350,3 +350,4 @@ body.on-page .wrap,body.on-page .top,body.on-page .serbar{visibility:hidden}
   #accueil .sheet-head,#accueil .homeq,#accueil .homeblank{grid-column:1/-1}
 }
 .tostudio{min-height:40px;padding:0 16px;border-radius:20px;font-size:15px}
+@media(max-width:480px){.hsub{display:none}}
