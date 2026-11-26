@@ -806,7 +806,24 @@ $('homePlan').addEventListener('click',()=>{ openHome(false); openPlanning(); })
 $('homeBlank').addEventListener('click',()=>{ openHome(false); newBlank(); });
 $('homeClose').addEventListener('click',()=>openHome(false));
 $('hdrLogo').addEventListener('click',()=>openHome(true)); $('hdrLogo').style.cursor='pointer'; $('hdrLogo').title='Accueil';
-openHome(true); // l'appli s'ouvre sur l'accueil
+// ---------- navigation : chaque écran est une page avec sa propre adresse ----------
+// #accueil, #matchs, #planning, #reglages, #serie, #studio. Le bouton retour du téléphone revient
+// à la page précédente ; une adresse peut être mise en favori (ex. …/#planning).
+const SHEETS={accueil:'accueil',matchs:'results',planning:'planning',reglages:'settings',serie:'series'};
+const OPEN={accueil:()=>openHome(true),matchs:()=>openResults(true),planning:()=>openPlanning(),reglages:()=>openSettings(true)};
+let routing=false;
+const pageNow=()=>{ for(const [k,id] of Object.entries(SHEETS)) if(!$(id).hidden) return k; return 'studio'; };
+function closeAll(){ for(const [k,id] of Object.entries(SHEETS)) if(!$(id).hidden){ if(k==='serie'&&series){ saveSeries(); series=null; } $(id).hidden=true; }
+  document.body.classList.remove('noscroll'); }
+function route(target){ if(!OPEN[target]&&target!=='studio') target=target==='serie'?'matchs':'accueil';
+  if(pageNow()===target) return; routing=true; closeAll(); if(OPEN[target]) OPEN[target](); setTimeout(()=>{ routing=false; syncHash(); },0); }
+function syncHash(){ if(routing) return; const p=pageNow(), h='#'+p; if(location.hash===h) return;
+  if(!location.hash) history.replaceState(null,'',h); else history.pushState(null,'',h);
+  document.body.classList.toggle('on-page',p!=='studio'); }
+new MutationObserver(()=>{ document.body.classList.toggle('on-page',pageNow()!=='studio'); syncHash(); })
+  .observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden']});
+window.addEventListener('popstate',()=>route((location.hash||'#accueil').slice(1)));
+route(location.hash&&location.hash!=='#studio'?location.hash.slice(1):'accueil'); // l'appli s'ouvre sur l'accueil (ou la page demandée)
 (async()=>{ const all=await idb.all(); for(const k in all) if(!k.startsWith('__')) teamPhotos[k]=all[k]; drawResume(); drawTeams(); await loadClubLogo(); await loadOpp(); render();
   try{ await Promise.all([document.fonts.load('100px Anton'),document.fonts.load("600 40px 'Barlow Condensed'")]); }catch(e){} render(); })();
 }

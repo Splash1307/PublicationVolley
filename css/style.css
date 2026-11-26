@@ -331,3 +331,22 @@ button.frm{width:44px;padding:0;flex:none;font-size:20px;color:var(--sky)}
 .rotbar #rot0{width:auto;font-size:14px}
 .rotsl{flex:1;display:flex;align-items:center;gap:8px}
 .rotsl input{flex:1;margin:0;padding:0;min-height:44px;background:transparent;border:0;accent-color:var(--navy)}
+
+/* les écrans (accueil, matchs, planning, réglages, série) sont des pages pleines, plus des fenêtres */
+.sheet{background:var(--bg);padding:0!important;align-items:stretch;overflow:hidden}
+.sheet-in{width:min(980px,100%);height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;padding:0 max(4vw,16px) 48px;margin:0 auto}
+.sheet-head{padding:22px 0 14px}
+.sheet-head h2{font-size:clamp(28px,4.5vw,42px)}
+.sheet-head img{width:52px;height:52px}
+.close{order:-1;font-size:22px}
+body.on-page .wrap,body.on-page .top,body.on-page .serbar{visibility:hidden}
+/* accueil en page */
+#accueil .sheet-in{display:flex;flex-direction:column}
+#accueil .homeq{font-size:clamp(24px,3vw,32px);margin:18px 0 22px}
+@media(min-width:760px){
+  #accueil .hcard{flex-direction:column;align-items:flex-start;gap:14px;padding:34px 30px;min-height:240px}
+  #accueil .hcard b{font-size:52px}
+  #accueil .sheet-in{display:grid;grid-template-columns:1fr 1fr;column-gap:20px;align-content:start}
+  #accueil .sheet-head,#accueil .homeq,#accueil .homeblank{grid-column:1/-1}
+}
+.tostudio{min-height:40px;padding:0 16px;border-radius:20px;font-size:15px}
