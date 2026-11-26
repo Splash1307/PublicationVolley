@@ -804,7 +804,7 @@ function openHome(v){ $('accueil').hidden=!v; document.body.classList.toggle('no
 $('homeRes').addEventListener('click',()=>{ openHome(false); openResults(true); });
 $('homePlan').addEventListener('click',()=>{ openHome(false); openPlanning(); });
 $('homeBlank').addEventListener('click',()=>{ openHome(false); newBlank(); });
-$('homeClose').addEventListener('click',()=>openHome(false));
+$('homeSet').addEventListener('click',()=>{ openHome(false); openSettings(true); });
 $('homeOpen').addEventListener('click',()=>openHome(true));
 $('hdrLogo').addEventListener('click',()=>openHome(true)); $('hdrLogo').style.cursor='pointer'; $('hdrLogo').title='Accueil';
 // ---------- navigation : chaque écran est une page avec sa propre adresse ----------
