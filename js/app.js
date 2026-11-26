@@ -748,9 +748,10 @@ async function drawPlanning(){ const w=plan.weeks[plan.w]; $('plWeek').textConte
 function regenPlanDesc(){ const w=plan.weeks[plan.w]; if(!w) return;
   const list=w.days.flatMap(d=>d.matches).map(m=>({team:m.team,opp:m.opp,date:m.date,heure:m.heure,home:m.domicile,salle:m.salleC,cup:m.cup}));
   $('plText').value=Description.planning(list,{seed:plan.seed,tags:$('plTags').checked}); }
-async function openPlanning(){ if(!results) await loadResults();
-  plan={weeks:buildWeeks(),w:0,imgs:[],seed:1}; openResults(false);
-  $('planning').hidden=false; document.body.classList.add('noscroll'); await drawPlanning(); }
+async function openPlanning(){ // la page s'affiche tout de suite, même si les matchs chargent encore
+  $('planning').hidden=false; openResults(false); openHome(false); document.body.classList.add('noscroll');
+  if(!results){ $('plAll').disabled=true; $('plPrev').disabled=$('plNext').disabled=true; $('plWeek').textContent='Chargement…'; $('plGrid').innerHTML='<p class="small">Chargement des matchs…</p>'; $('plText').value=''; await loadResults(); }
+  plan={weeks:buildWeeks(),w:0,imgs:[],seed:1}; await drawPlanning(); }
 $('plStart').addEventListener('click',openPlanning);
 $('plClose').addEventListener('click',()=>{ $('planning').hidden=true; document.body.classList.remove('noscroll'); });
 $('plPrev').addEventListener('click',()=>{ if(plan.w>0){ plan.w--; drawPlanning(); } });
@@ -802,7 +803,7 @@ const saved=restore(); fillTeams(saved&&saved.team); oppId=(saved&&saved.oppId)|
 // ---------- accueil : choisir Résultats ou Planning (après le code d'accès) ----------
 function openHome(v){ $('accueil').hidden=!v; document.body.classList.toggle('noscroll',v); }
 $('homeRes').addEventListener('click',()=>{ openHome(false); openResults(true); });
-$('homePlan').addEventListener('click',()=>{ openHome(false); openPlanning(); });
+$('homePlan').addEventListener('click',()=>openPlanning());
 $('homeBlank').addEventListener('click',()=>{ openHome(false); newBlank(); });
 $('homeSet').addEventListener('click',()=>{ openHome(false); openSettings(true); });
 $('homeOpen').addEventListener('click',()=>openHome(true));
