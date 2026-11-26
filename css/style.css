@@ -351,3 +351,14 @@ body.on-page .wrap,body.on-page .top,body.on-page .serbar{visibility:hidden}
 }
 .tostudio{min-height:40px;padding:0 16px;border-radius:20px;font-size:15px}
 @media(max-width:480px){.hsub{display:none}}
+/* maison + réglages dans l'en-tête des pages */
+.headnav{display:flex;gap:8px;flex:none}
+.headnav .gear,#homeSet{position:static;width:44px;height:44px}
+@media(max-width:480px){.sheet-head{flex-wrap:wrap}.sheet-head h2{font-size:26px}}
+@media(max-width:480px){
+  .sheet-head{flex-wrap:nowrap;gap:6px}
+  .sheet-head > img{display:none}
+  .sheet-head h2{font-size:24px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sheet-head .close,.sheet-head .newpub,.headnav .gear,#homeSet{width:38px;height:38px;flex:none}
+  .headnav{gap:6px}
+}
