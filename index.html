@@ -128,7 +128,7 @@
     <div class="panel desc">
       <h2>Description</h2>
       <textarea id="dText" rows="8" placeholder="Choisis un match (ou remplis le score) pour générer la description." aria-label="Description de la publication"></textarea>
-      <div class="drow"><label class="chk"><input type="checkbox" id="dTags" checked> Hashtags</label><span class="sp"></span><button type="button" id="dAgain">Autre version</button><button type="button" id="dCopy" class="main">Copier</button></div>
+      <div class="drow"><input type="checkbox" id="dTags" checked hidden><span class="sp"></span><button type="button" id="dAgain">Autre version</button><button type="button" id="dCopy" class="main">Copier</button></div>
     </div>
   </section>
 </main>
@@ -163,7 +163,7 @@
     <div class="desc">
       <h3>Description de la publication</h3>
       <textarea id="plText" rows="10" aria-label="Description du planning"></textarea>
-      <div class="drow"><label class="chk"><input type="checkbox" id="plTags" checked> Hashtags</label><span class="sp"></span><button type="button" id="plAgain">Autre version</button><button type="button" id="plCopy" class="main">Copier</button></div>
+      <div class="drow"><input type="checkbox" id="plTags" checked hidden><span class="sp"></span><button type="button" id="plAgain">Autre version</button><button type="button" id="plCopy" class="main">Copier</button></div>
     </div>
     <div class="sernav pl"><button type="button" id="plAll" class="main">Tout télécharger</button></div>
   </div>
@@ -193,7 +193,7 @@
       <div class="desc">
         <h3>Description de la publication</h3>
         <textarea id="sText" rows="10" aria-label="Description de la publication"></textarea>
-        <div class="drow"><label class="chk"><input type="checkbox" id="sDetail" checked> Détail des matchs</label><label class="chk"><input type="checkbox" id="sTags" checked> Hashtags</label>
+        <div class="drow"><label class="chk"><input type="checkbox" id="sDetail" checked> Détail des matchs</label><input type="checkbox" id="sTags" checked hidden>
           <span class="sp"></span><button type="button" id="sAgain">Autre version</button><button type="button" id="sCopy" class="main">Copier</button></div>
       </div>
       <button type="button" id="serDrop" class="ghost sm">Supprimer la série</button>
