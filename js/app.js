@@ -711,6 +711,7 @@ function drawDay(day,imgs,Hc=1350){ const W2=W; cv.width=W2; cv.height=Hc;
   waves(Hc-1350);
   const x=new Date(day.date+'T12:00');
   grunge(dmy(day.date),W-22,64+top,56,'right',360);
+  if(clubLogo){ ctx.save(); ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=14; ctx.shadowOffsetY=4; contain(clubLogo,100,96+top,150,150); ctx.restore(); } // logo du club, en haut à gauche
   grunge('PLANNING',W/2,186+top,120,'center',900);
   grunge(`${JOUR[x.getDay()]} ${x.getDate()} ${MOISU[x.getMonth()]}`,W/2,262+top,56,'center',800,C.yel);
   ctx.fillStyle='#fff'; ctx.fillRect(417,300+top,242,6); ctx.fillRect(384,321+top,310,6);
@@ -742,6 +743,7 @@ async function drawPlanning(){ const w=plan.weeks[plan.w]; $('plWeek').textConte
   $('plPrev').disabled=plan.w<=0; $('plNext').disabled=plan.w>=plan.weeks.length-1;
   if(!w){ $('plGrid').innerHTML='<p class="small">Aucun match à venir pour le moment.</p>'; $('plAll').disabled=true; $('plText').value=''; return; }
   $('plGrid').innerHTML='<p class="small">Préparation des visuels…</p>';
+  if(!clubLogo) await loadClubLogo();
   const logos={}; for(const d of w.days) for(const m of d.matches) if(m.logo&&!logos[m.logo]) logos[m.logo]=await img(m.logo);
   const savedH=H; plan.imgs=w.days.map(d=>drawDay(d,logos,plan.fmt)); H=savedH; render(); // le studio retrouve son visuel
   $('plGrid').classList.toggle('story',plan.fmt>1350);
