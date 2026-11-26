@@ -8,7 +8,7 @@ const ov=document.getElementById('ov'), ox=ov.getContext('2d'); // calque des ca
 let lastBlob=null; // image propre du dernier rendu, prête à enregistrer / partager tout de suite
 const dataUrlBlob=u=>{ const [h,d]=u.split(','), bin=atob(d), a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:h.slice(5,h.indexOf(';'))}); };
 let kind='result', H=1350, matchPhoto=null, clubLogo=null, clubLogoData=null, oppImg=null, oppId=null;
-const SEED=12;
+const SEED=13;
 const uid=()=>Math.random().toString(36).slice(2,10);
 let teams=['Régionale Masculine','Départementale Masculine 2','Départementale Masculine 3','Départementale Féminine 1','Départementale Féminine 2','M18 Masculine','M18 Féminine','M15 Féminine'].map(n=>({id:uid(),name:n}));
 // Clubs adverses par défaut. aka = anciens noms, pour renommer les clubs déjà enregistrés.
@@ -25,6 +25,7 @@ let opps=[
   {name:"La Baule Volley-Ball",ffvb:"0443000",logo:"assets/logos/la-baule-volley-ball.webp"},
   {name:"La Roche-sur-Yon Volley-Ball",ffvb:"0858891",logo:"assets/logos/la-roche-volley-ball-lrvb.webp",aka:["La Roche Volley-Ball (LRVB)"]},
   {name:"Les Herbiers",logo:"assets/logos/epesses-herbiers-vb-ehvb.webp"},
+  {name:"Les Landes / Tiffauges / La Bruffière",logo:"assets/logos/entente-landes-tiffauges-bruffiere.webp"},
   {name:"Les Neptunes Nantes Volley Association",ffvb:"0444976",logo:"assets/logos/neptunes-de-nantes.webp"},
   {name:"Les Sables Volley Vendée",ffvb:"0854977",logo:"assets/logos/les-sables-volley-vendee-lsvv.webp",aka:["Les Sables Volley Vendée (LSVV)"]},
   {name:"Mareuil Sporting Club",ffvb:"0857789",logo:"assets/logos/mareuil-sporting-club.webp"},
